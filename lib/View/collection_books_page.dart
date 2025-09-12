@@ -6,15 +6,40 @@ import 'package:library_application/View/current_book_page.dart';
 class CollectionBooks extends StatefulWidget {
   const CollectionBooks({super.key});
 
-
-   @override
-   State<CollectionBooks> createState() => _CollectionBooksState();
+  @override
+  State<CollectionBooks> createState() => _CollectionBooksState();
 }
 
-class _CollectionBooksState extends State<CollectionBooks>{
-  
+class _CollectionBooksState extends State<CollectionBooks> {
   @override
   Widget build(BuildContext context) {
+    return collectionContent();
+  }
+
+  Scaffold collectionContent() {
+    if (getAllFavouriteBook().isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 50.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Список пуст",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "Добавьте книгу в коллецию",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       body: ListView.builder(
         padding: const EdgeInsets.all(8),
@@ -25,58 +50,81 @@ class _CollectionBooksState extends State<CollectionBooks>{
               margin: const EdgeInsets.only(bottom: 8.0),
               //elevation: 4.0,
               color: Theme.of(context).cardColor,
-              child: Padding(padding: EdgeInsets.all(8),
+              child: Padding(
+                padding: EdgeInsets.all(8),
                 child: Row(
                   children: <Widget>[
                     //Icon(Icons.menu_book, size: 40,),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(getAllFavouriteBook()[index].imagePath, width: 80,
-                      height: 120,
-                      fit: BoxFit.cover,),
+                      child: Image.network(
+                        getAllFavouriteBook()[index].imagePath,
+                        width: 80,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text(getAllFavouriteBook()[index].title, overflow: TextOverflow.ellipsis, softWrap: true, maxLines: 3, style: TextStyle(fontSize: 20, height: 1, color: Theme.of(context).colorScheme.primary),),
+                          Text(
+                            getAllFavouriteBook()[index].title,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            maxLines: 3,
+                            style: TextStyle(
+                              fontSize: 20,
+                              height: 1,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
                           SizedBox(height: 8),
-                          Text("Автор: ${getAllFavouriteBook()[index].author}")
+                          Text("Автор: ${getAllFavouriteBook()[index].author}"),
                         ],
                       ),
                     ),
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          !collectionOrNo(getAllFavouriteBook()[index]) ? addFavouritreBook(getAllFavouriteBook()[index]) : deleteFavouriteBook(getAllFavouriteBook()[index]);
+                          !collectionOrNo(getAllFavouriteBook()[index])
+                              ? addFavouritreBook(getAllFavouriteBook()[index])
+                              : deleteFavouriteBook(
+                                  getAllFavouriteBook()[index],
+                                );
                         });
                       },
-                      icon: collectionOrNo(getAllFavouriteBook()[index]) ? Icon(Icons.bookmark) : Icon(Icons.bookmark_add_outlined),),
-                  ] 
-                )
-              )
+                      icon: collectionOrNo(getAllFavouriteBook()[index])
+                          ? Icon(Icons.bookmark)
+                          : Icon(Icons.bookmark_add_outlined),
+                    ),
+                  ],
+                ),
+              ),
             ),
             onTap: () {
               Navigator.push(
-               context,
-               MaterialPageRoute(
-                builder: (_) => CurrentBook(book: getAllFavouriteBook()[index]),
-                //builder: (_) => CollectionBooks(),
-              ),
-            );
-          }
-        );
-      })
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      CurrentBook(book: getAllFavouriteBook()[index]),
+                  //builder: (_) => CollectionBooks(),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
 
 bool collectionOrNo(Book bookInBookList) {
-  for(Book bookInCollection in getAllFavouriteBook()) {
-    if(bookInCollection == bookInBookList) {
+  for (Book bookInCollection in getAllFavouriteBook()) {
+    if (bookInCollection == bookInBookList) {
       return true;
-    } 
+    }
   }
-  return false; 
+  return false;
 }

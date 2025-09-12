@@ -15,14 +15,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   //Тема поумолчанию
   ThemeMode _themeMode = ThemeMode.light;
   bool isLight = true;
 
   //Переключение темы
   void _toggleTheme(bool isLight) {
-    setState(() { 
+    setState(() {
       _themeMode = isLight ? ThemeMode.light : ThemeMode.dark;
       this.isLight = isLight;
     });
@@ -33,11 +32,20 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Library',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.light, ),
-        
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepOrange,
+          brightness: Brightness.light,
+        ),
+        highlightColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.dark, ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepOrange,
+          brightness: Brightness.dark,
+        ),
+        highlightColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
       ),
 
       themeMode: _themeMode,
@@ -50,7 +58,11 @@ class _MyAppState extends State<MyApp> {
 class LibraryMainPage extends StatefulWidget {
   final void Function(bool) onThemeChanged;
   final bool isLight;
-  const LibraryMainPage({super.key, required this.onThemeChanged, required this.isLight});  
+  const LibraryMainPage({
+    super.key,
+    required this.onThemeChanged,
+    required this.isLight,
+  });
 
   @override
   State<LibraryMainPage> createState() => _LibraryMainPageState();
@@ -65,40 +77,48 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorAppBar(currentPageIndex),
-        title: Text("Личная библиотека", style: TextStyle(fontWeight: FontWeight.w500, color: Colors.deepOrange),),
+        title: Text(
+          "Личная библиотека",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.deepOrange,
+          ),
+        ),
         actions: <Widget>[
           IconButton(
             onPressed: () {
               final snackBar = SnackBar(
-                content: const Text("Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями."),
-                action: SnackBarAction(
-                label: "Спрятать",
-                onPressed: () {},));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }, 
-          icon: Icon(Icons.info, color: Colors.deepOrange,)),
+                content: const Text(
+                  "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
+                ),
+                action: SnackBarAction(label: "Спрятать", onPressed: () {}),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            icon: Icon(Icons.info, color: Colors.deepOrange),
+          ),
         ],
       ),
-      
+
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-      labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
-            return const TextStyle(color: Colors.deepOrange); // активный
-          }
-          return const TextStyle(color: Colors.grey); // неактивный
-        },
-      ),
-      iconTheme: MaterialStateProperty.resolveWith<IconThemeData>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
-            return const IconThemeData(color: Colors.deepOrange); // активный
-          }
-          return const IconThemeData(color: Colors.grey); // неактивный
-        },
-      ),
-    ),
+          labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.selected)) {
+              return const TextStyle(color: Colors.deepOrange); // активный
+            }
+            return const TextStyle(color: Colors.grey); // неактивный
+          }),
+          iconTheme: MaterialStateProperty.resolveWith<IconThemeData>((
+            Set<MaterialState> states,
+          ) {
+            if (states.contains(MaterialState.selected)) {
+              return const IconThemeData(color: Colors.deepOrange); // активный
+            }
+            return const IconThemeData(color: Colors.grey); // неактивный
+          }),
+        ),
         child: NavigationBar(
           onDestinationSelected: (int index) {
             setState(() {
@@ -108,39 +128,41 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
           indicatorColor: Colors.transparent,
           overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
           //labelTextStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Colors.purple)), //Цвет надписей
-          //indicatorColor: Theme.of(context).colorScheme.inversePrimary, 
+          //indicatorColor: Theme.of(context).colorScheme.inversePrimary,
           selectedIndex: currentPageIndex,
           destinations: const <Widget>[
             NavigationDestination(
               selectedIcon: Icon(Icons.home),
               icon: Icon(Icons.home_outlined),
               label: "Главная",
-              ),
+            ),
             NavigationDestination(
               selectedIcon: Icon(Icons.bookmark),
               icon: Icon(Icons.bookmark_outline),
-              label: "Коллекция"),
+              label: "Коллекция",
+            ),
             NavigationDestination(
               selectedIcon: Icon(Icons.person),
-              icon: Icon(Icons.person_outline), 
-              label: "Профиль")
-          ]),
+              icon: Icon(Icons.person_outline),
+              label: "Профиль",
+            ),
+          ],
+        ),
       ),
-        body: <Widget>[
+      body: <Widget>[
         MainMenu(),
         CollectionBooks(),
-        ProfilePage(onThemeChanged: widget.onThemeChanged, isLight: widget.isLight),
-        ][currentPageIndex],
-        
+        ProfilePage(
+          onThemeChanged: widget.onThemeChanged,
+          isLight: widget.isLight,
+        ),
+      ][currentPageIndex],
     );
-    
   }
+
   Color? colorAppBar(int currentPageIndex) {
-    if(currentPageIndex == 2) return Theme.of(context).colorScheme.surfaceContainer;
+    if (currentPageIndex == 2)
+      return Theme.of(context).colorScheme.surfaceContainer;
     return null;
   }
 }
-
-
-
-
