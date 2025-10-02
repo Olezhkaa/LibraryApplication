@@ -12,19 +12,19 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
-      <WidgetStatesConstraint, Icon>{
-        WidgetState.selected: Icon(Icons.sunny, color: Colors.amber),
-        WidgetState.any: Icon(Icons.dark_mode,),
-  },);
+  // static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
+  //     <WidgetStatesConstraint, Icon>{
+  //       WidgetState.selected: Icon(Icons.sunny, color: Colors.amber),
+  //       WidgetState.any: Icon(Icons.dark_mode,),
+  // },);
 
-  late bool valueThemeMode;
+    late bool valueThemeMode;
 
-  @override
-  void initState() {
-    super.initState();
-    valueThemeMode = widget.isLight; // ставим switch в сохранённое положение
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   valueThemeMode = widget.isLight; // ставим switch в сохранённое положение
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -58,29 +58,45 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.only(left: 20),
+            padding: const EdgeInsets.only(left: 10, right: 10),
             child: Row(
               children: [
-                Text("Тема: "),
+                //Text("Тема: "),
                 SizedBox(width: 8,),
-                SizedBox(
-                  width: 50,
-                  child: Switch(
-                  thumbIcon: thumbIcon,
-                  value: valueThemeMode, 
-                  onChanged: (bool value) {
-                    setState(() {
-                    valueThemeMode = value;
-                    });
-                    widget.onThemeChanged(value);
-                  }),
-                )
+                buttonReplaceTheme(),
               ],
             ),
           )
         ],
       ),
     );
+  }
+
+  Expanded buttonReplaceTheme() {
+    bool currentTheme = widget.isLight;
+    IconData iconTheme = currentTheme ? Icons.sunny : Icons.dark_mode;
+    String textTheme = currentTheme ? "Светлая тема" : "Темная тема";
+
+    return Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                      style: ButtonStyle(animationDuration: Duration(microseconds: 100)),
+                      onPressed: () {
+                        setState(() {
+                          valueThemeMode = !currentTheme;
+                        });
+                        widget.onThemeChanged(!currentTheme);
+                      }, 
+                      child: Row(
+                        children: [
+                          Icon(iconTheme),
+                          SizedBox(width: 20,),
+                          Text(textTheme),
+                        ],
+                      ),),
+                ),
+              );
   }
 }
 

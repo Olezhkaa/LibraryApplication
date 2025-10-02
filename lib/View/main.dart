@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:library_application/View/collection_books_page.dart';
 import 'package:library_application/View/main_menu_page.dart';
 import 'package:library_application/View/profile_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+  // читаем сохранённую тему, если нет — ставим светлую
+  final isLight = prefs.getBool('isLightTheme') ?? true;
+
+  runApp(MyApp(initialIsLight: isLight));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool initialIsLight;
+  const MyApp({super.key, required this.initialIsLight});
+
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -16,14 +25,24 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   //Тема поумолчанию
-  ThemeMode _themeMode = ThemeMode.light;
-  bool isLight = true;
+  late ThemeMode _themeMode;
+  late bool isLight;
 
-  //Переключение темы
-  void _toggleTheme(bool isLight) {
+  @override
+  void initState() {
+    super.initState();
+    isLight = widget.initialIsLight;
+    _themeMode = isLight ? ThemeMode.light : ThemeMode.dark;
+  }
+
+  // Переключение темы + сохранение
+  void _toggleTheme(bool isLight) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLightTheme', isLight);
+
     setState(() {
-      _themeMode = isLight ? ThemeMode.light : ThemeMode.dark;
       this.isLight = isLight;
+      _themeMode = isLight ? ThemeMode.light : ThemeMode.dark;
     });
   }
 
