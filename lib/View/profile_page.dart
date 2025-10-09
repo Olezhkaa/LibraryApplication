@@ -12,19 +12,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // static const WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
-  //     <WidgetStatesConstraint, Icon>{
-  //       WidgetState.selected: Icon(Icons.sunny, color: Colors.amber),
-  //       WidgetState.any: Icon(Icons.dark_mode,),
-  // },);
 
-    late bool valueThemeMode;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   valueThemeMode = widget.isLight; // ставим switch в сохранённое положение
-  // }
+  late bool valueThemeMode;
 
   @override
   Widget build(BuildContext context) {

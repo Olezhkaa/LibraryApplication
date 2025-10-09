@@ -89,6 +89,7 @@ class LibraryMainPage extends StatefulWidget {
 
 class _LibraryMainPageState extends State<LibraryMainPage> {
   int currentPageIndex = 0;
+  int viewCollectionPage = 0;
   //Color colorTheme = Theme.of(context).colorScheme.inversePrimary;
 
   @override
@@ -104,6 +105,7 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
           ),
         ),
         actions: <Widget>[
+          if (currentPageIndex == 1) iconButtonViewCollection(),
           IconButton(
             onPressed: () {
               final snackBar = SnackBar(
@@ -170,13 +172,25 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
       ),
       body: <Widget>[
         MainMenu(),
-        CollectionBooks(),
+        CollectionBooks(viewCollectionPage: viewCollectionPage),
         ProfilePage(
           onThemeChanged: widget.onThemeChanged,
           isLight: widget.isLight,
         ),
       ][currentPageIndex],
     );
+  }
+
+  IconButton iconButtonViewCollection() {
+    return IconButton(
+          onPressed: () {
+            setState(() {
+                viewCollectionPage == 0 ? viewCollectionPage = 1 : viewCollectionPage = 0;
+            });
+          },
+          icon: viewCollectionPage == 0 ? Icon(Icons.view_module, color: Colors.deepOrange,) : Icon(Icons.view_list, color: Colors.deepOrange,),
+          iconSize: 27,
+        );
   }
 
   Color? colorAppBar(int currentPageIndex) {
