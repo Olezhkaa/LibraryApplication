@@ -91,7 +91,6 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
   int currentPageIndex = 0;
   int viewCollectionPage = 0;
   //Color colorTheme = Theme.of(context).colorScheme.inversePrimary;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

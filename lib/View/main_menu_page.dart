@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/Data/Model/Book.dart';
-import 'package:library_application/Data/Model/Genre.dart';
-import 'package:library_application/Data/Repository/BookRepository.dart';
-import 'package:library_application/Data/Repository/GenreRepository.dart';
-import 'package:library_application/View/current_book_page.dart';
+import 'package:library_application/Entities/Book.dart';
+import 'package:library_application/Entities/Genre.dart';
+import 'package:library_application/Repository/BookRepository.dart';
+import 'package:library_application/Repository/GenreRepository.dart';
+// import 'package:library_application/View/current_book_page.dart';
 
 class MainMenu extends StatefulWidget {
   const MainMenu({super.key});
@@ -13,42 +13,57 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
+  List<Book>? bookList;
+  List<Genre>? genreList;
+
+  @override
+  void initState() {
+    _initializeData();
+    super.initState();
+  }
+
+  Future<void> _initializeData() async {
+    bookList = await BookRepository().getAllBooks();
+    genreList = await GenreRepository().getAllGenres();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     //var romanticGenreBook = getRomanticGenreBook(bookList);
     //var detectiveGenreBook = getDetectiveGenreBook(bookList);
-
     return Scaffold(
-      body: ListView.builder(
+      body: genreList == null ? const SizedBox() :
+       ListView.builder(
         padding: const EdgeInsets.all(8),
-        itemCount: getAllGenre().length,
+        itemCount: genreList!.length,
         itemBuilder: (BuildContext context, int index) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (getGenreBookList(
-                getAllBook(),
-                getAllGenre()[index],
+                bookList!,
+                genreList![index],
               ).isNotEmpty)
                 Text(
-                  getAllGenre()[index].title,
+                  genreList![index].title,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                 ),
               if (getGenreBookList(
-                getAllBook(),
-                getAllGenre()[index],
+                bookList!,
+                genreList![index],
               ).isNotEmpty)
                 SizedBox(height: 8),
               if (getGenreBookList(
-                getAllBook(),
-                getAllGenre()[index],
+                bookList!,
+                genreList![index],
               ).isNotEmpty)
                 BookGenreListView(
                   genreBookList: getGenreBookList(
-                    getAllBook(),
-                    getAllGenre()[index],
+                    bookList!,
+                    genreList![index],
                   ),
-                  genreCurrentBook: getAllGenre()[index],
+                  genreCurrentBook: genreList![index],
                 ),
             ],
           );
@@ -114,13 +129,13 @@ class BookGenreListView extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CurrentBook(book: genreBookList[index]),
-                    //builder: (_) => CollectionBooks(),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => CurrentBook(book: genreBookList[index]),
+                //     //builder: (_) => CollectionBooks(),
+                //   ),
+                // );
               },
             ),
           );
@@ -133,7 +148,7 @@ class BookGenreListView extends StatelessWidget {
 List<Book> getGenreBookList(List<Book> allBookList, Genre genre) {
   List<Book> bookListThisGenre = [];
   for (var bookInAllList in allBookList) {
-    if (bookInAllList.genre == genre.id) bookListThisGenre.add(bookInAllList);
+    if (bookInAllList.genre == genre.title) bookListThisGenre.add(bookInAllList);
   }
   return bookListThisGenre;
 }
