@@ -54,7 +54,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
               key: ValueKey(book),
               width: 180,
               height: 340,
-              child: InkWell(
+              child: GestureDetector(
                   key: ValueKey(book),
                   child: Card.outlined(
                     margin: EdgeInsets.zero,
@@ -100,11 +100,23 @@ class _CollectionBooksState extends State<CollectionBooks> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CurrentBook(book: getAllFavouriteBook()[index]),
+                        builder: (_) => CurrentBook(book: book),
                         //builder: (_) => CollectionBooks(),
                       ),
                     );
                   },
+                  // onLongPress: () {
+                  //   showDialog(
+                  //     context: context, 
+                  //     builder: (BuildContext context) {
+                  //       return SimpleDialog(
+                  //         title: Text(book.title),
+                  //         children: [
+                  //           Text(book.description)
+                  //         ],
+                  //       );
+                  //     });
+                  // },
                 ),
             );
           }, 
@@ -146,7 +158,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
           padding: const EdgeInsets.all(8),
           children: [
             for (final bookInCollection in getAllFavouriteBook()) 
-              InkWell(
+              GestureDetector(
                 key: Key('${bookInCollection.id}'),
                 child: Card.outlined(
                   margin: EdgeInsets.only(bottom: 8),
@@ -215,6 +227,18 @@ class _CollectionBooksState extends State<CollectionBooks> {
                     ),
                   );
                 },
+                // onDoubleTap: () {
+                //     showDialog(
+                //       context: context, 
+                //       builder: (BuildContext context) {
+                //         return SimpleDialog(
+                //           title: Text(bookInCollection.title),
+                //           children: [
+                //             Text(bookInCollection.description)
+                //           ],
+                //         );
+                //       });
+                //   },
               )
           ],
           proxyDecorator: (Widget child, int index, Animation<double> animation) {

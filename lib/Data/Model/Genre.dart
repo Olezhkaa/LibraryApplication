@@ -1,5 +1,5 @@
 class Genre {
-  int _id;
+  final int _id;
   String _title;
 
   Genre (

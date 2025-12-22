@@ -48,7 +48,20 @@ class _CurrentBookState extends State<CurrentBook> {
                       });
                     },
                     icon: collectionOrNo(widget.book) ? Icon(Icons.bookmark) : Icon(Icons.bookmark_add_outlined),),
-              ],)
+              ],),
+              SizedBox(height: 20,),
+              Padding(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      WidgetSpan(child: SizedBox(width: 40,)),
+                      TextSpan(text: widget.book.description, style: TextStyle(fontSize: 18, height: 1.5),)
+                    ]
+                  ),
+                  textAlign: TextAlign.justify,)
+                //Text(widget.book.description, style: TextStyle(fontSize: 18, height: 1.5), textAlign: TextAlign.justify,),
+              ),
             ]
           ),
         ),

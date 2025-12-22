@@ -123,18 +123,18 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
 
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
-          labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>((
-            Set<MaterialState> states,
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+            Set<WidgetState> states,
           ) {
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return const TextStyle(color: Colors.deepOrange); // активный
             }
             return const TextStyle(color: Colors.grey); // неактивный
           }),
-          iconTheme: MaterialStateProperty.resolveWith<IconThemeData>((
-            Set<MaterialState> states,
+          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
+            Set<WidgetState> states,
           ) {
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return const IconThemeData(color: Colors.deepOrange); // активный
             }
             return const IconThemeData(color: Colors.grey); // неактивный
@@ -147,7 +147,7 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
             });
           },
           indicatorColor: Colors.transparent,
-          overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
+          overlayColor: WidgetStateProperty.all<Color>(Colors.transparent),
           //labelTextStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Colors.purple)), //Цвет надписей
           //indicatorColor: Theme.of(context).colorScheme.inversePrimary,
           selectedIndex: currentPageIndex,
@@ -194,8 +194,9 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
   }
 
   Color? colorAppBar(int currentPageIndex) {
-    if (currentPageIndex == 2)
+    if (currentPageIndex == 2) {
       return Theme.of(context).colorScheme.surfaceContainer;
+    }
     return null;
   }
 }
