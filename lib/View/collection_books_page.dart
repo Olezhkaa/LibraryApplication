@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/Data/Model/Book.dart';
-import 'package:library_application/Data/Repository/FavouriteBookRepository.dart';
 import 'package:animated_reorderable_list/animated_reorderable_list.dart';
+import 'package:library_application/Entities/Book.dart';
+import 'package:library_application/Entities/FavoriteBook.dart';
+import 'package:library_application/Repository/BookRepository.dart';
+import 'package:library_application/Repository/FavoriteBookRepository.dart';
+import 'package:library_application/View/current_book_page.dart';
 
 class CollectionBooks extends StatefulWidget {
   final int viewCollectionPage;
@@ -12,13 +15,42 @@ class CollectionBooks extends StatefulWidget {
 }
 
 class _CollectionBooksState extends State<CollectionBooks> {
+  final int userId = 1;
+  List<FavoriteBook>? favoriteBookList;
+  List<Book>? bookList;
+
+  @override
+  void initState() {
+    _initializeData();
+    super.initState();
+  }
+
+  Future<void> _initializeData() async {
+    favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(userId);
+
+    // Загружаем информацию о книгах
+    if (favoriteBookList != null && favoriteBookList!.isNotEmpty) {
+      final bookRepository = BookRepository();
+      bookList = [];
+      for (final favoriteBook in favoriteBookList!) {
+        try {
+          final book = await bookRepository.getBookById(favoriteBook.bookId);
+          bookList!.add(book);
+        } catch (e) {
+          debugPrint('Не удалось загрузить книгу ${favoriteBook.bookId}: $e');
+        }
+      }
+    }
+    setState(() {});
+  }  
+
   @override
   Widget build(BuildContext context) {
     return collectionContent();
   }
 
   Scaffold collectionContent() {
-    if (getAllFavouriteBook().isEmpty) {
+    if (favoriteBookList == null) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -45,9 +77,9 @@ class _CollectionBooksState extends State<CollectionBooks> {
         body: Center(
           child: AnimatedReorderableGridView(
             padding: EdgeInsets.only(top: 20, bottom: 10, left: 20),
-            items: getAllFavouriteBook(),
+            items: bookList!,
             itemBuilder: (BuildContext context, int index) {
-              Book book = getAllFavouriteBook()[index];
+              Book book = bookList![index];
               return SizedBox(
                 key: ValueKey(book),
                 width: 180,
@@ -95,26 +127,15 @@ class _CollectionBooksState extends State<CollectionBooks> {
                     ),
                   ),
                   onTap: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => CurrentBook(book: Book(1, '', '', '', '', '')),
-                    //     //builder: (_) => CollectionBooks(),
-                    //   ),
-                    // );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CurrentBook(book: book),
+                        // builder: (_) => CollectionBooks(),
+                      ),
+                    );
                   },
-                  // onLongPress: () {
-                  //   showDialog(
-                  //     context: context,
-                  //     builder: (BuildContext context) {
-                  //       return SimpleDialog(
-                  //         title: Text(book.title),
-                  //         children: [
-                  //           Text(book.description)
-                  //         ],
-                  //       );
-                  //     });
-                  // },
+
                 ),
               );
             },
@@ -126,8 +147,8 @@ class _CollectionBooksState extends State<CollectionBooks> {
             ),
             onReorder: (int oldIndex, int newIndex) {
               setState(() {
-                final Book item = getAllFavouriteBook().removeAt(oldIndex);
-                getAllFavouriteBook().insert(newIndex, item);
+                final Book item = bookList!.removeAt(oldIndex);
+                bookList!.insert(newIndex, item);
               });
             },
             enterTransition: [FlipInX(), ScaleIn()],
@@ -155,9 +176,9 @@ class _CollectionBooksState extends State<CollectionBooks> {
         body: ReorderableListView(
           padding: const EdgeInsets.all(8),
           children: [
-            for (final bookInCollection in getAllFavouriteBook())
+            for (int indexBook = 0; indexBook < bookList!.length; indexBook++)
               GestureDetector(
-                key: Key('${bookInCollection.id}'),
+                key: Key('${favoriteBookList![indexBook].id}'),
                 child: Card.outlined(
                   margin: EdgeInsets.only(bottom: 8),
                   //elevation: 4.0,
@@ -170,7 +191,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            bookInCollection.imagePath,
+                            bookList![indexBook].imagePath,
                             width: 80,
                             height: 120,
                             fit: BoxFit.cover,
@@ -182,7 +203,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                bookInCollection.title,
+                                bookList![indexBook].title,
                                 overflow: TextOverflow.ellipsis,
                                 softWrap: true,
                                 maxLines: 3,
@@ -193,48 +214,51 @@ class _CollectionBooksState extends State<CollectionBooks> {
                                 ),
                               ),
                               SizedBox(height: 8),
-                              Text("Автор: ${bookInCollection.author}"),
+                              Text("Автор: ${bookList![indexBook].author}"),
                             ],
                           ),
                         ),
                         IconButton(
-                          onPressed: () {
-                            setState(() {
-                              !collectionOrNo(bookInCollection)
-                                  ? addFavouritreBook(bookInCollection)
-                                  : deleteFavouriteBook(bookInCollection);
+                          onPressed: () async {
+                            final repository = Favoritebookrepository();
+                            final isInFavorites = await repository.extentionBookInList(userId, bookList![indexBook].id);
+                            setState(() async {
+                              if (isInFavorites) {
+                                await repository.deleteFavoriteBook(userId, bookList![indexBook].id);
+                                // Обновляем данные
+                                await _initializeData();
+                              } else {
+                                await repository.postFavoriteBook(userId, bookList![indexBook].id);
+                                // Обновляем данные
+                                await _initializeData();
+                              }
                             });
                           },
-                          icon: collectionOrNo(bookInCollection)
-                              ? Icon(Icons.bookmark)
-                              : Icon(Icons.bookmark_add_outlined),
-                        ),
+                          icon: FutureBuilder<bool>(
+                            future: Favoritebookrepository().extentionBookInList(userId, bookList![indexBook].id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return snapshot.data!
+                                    ? Icon(Icons.bookmark)
+                                    : Icon(Icons.bookmark_add_outlined);
+                              }
+                              return Icon(Icons.bookmark_border);
+                            },
+                          ),),
                       ],
                     ),
                   ),
                 ),
                 onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) =>
-                  //         CurrentBook(book: bookInCollection),
-                  //     //builder: (_) => CollectionBooks(),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          CurrentBook(book: bookList![indexBook]),
+                      //builder: (_) => CollectionBooks(),
+                    ),
+                  );
                 },
-                // onDoubleTap: () {
-                //     showDialog(
-                //       context: context,
-                //       builder: (BuildContext context) {
-                //         return SimpleDialog(
-                //           title: Text(bookInCollection.title),
-                //           children: [
-                //             Text(bookInCollection.description)
-                //           ],
-                //         );
-                //       });
-                //   },
               ),
           ],
           proxyDecorator:
@@ -251,98 +275,13 @@ class _CollectionBooksState extends State<CollectionBooks> {
               if (oldIndex < newIndex) {
                 newIndex -= 1;
               }
-              final Book item = getAllFavouriteBook().removeAt(oldIndex);
-              getAllFavouriteBook().insert(newIndex, item);
+              final Book item = bookList!.removeAt(oldIndex);
+              bookList!.insert(newIndex, item);
             });
           },
         ),
       );
     }
-    // return Scaffold(
-    //   body: ListView.builder(
-    //     padding: const EdgeInsets.all(8),
-    //     itemCount: getAllFavouriteBook().length,
-    //     itemBuilder: (BuildContext context, int index) {
-    //       return InkWell(
-    //         child: Card.outlined(
-    //           margin: const EdgeInsets.only(bottom: 8.0),
-    //           //elevation: 4.0,
-    //           color: Theme.of(context).cardColor,
-    //           child: Padding(
-    //             padding: EdgeInsets.all(8),
-    //             child: Row(
-    //               children: <Widget>[
-    //                 //Icon(Icons.menu_book, size: 40,),
-    //                 ClipRRect(
-    //                   borderRadius: BorderRadius.circular(10),
-    //                   child: Image.network(
-    //                     getAllFavouriteBook()[index].imagePath,
-    //                     width: 80,
-    //                     height: 120,
-    //                     fit: BoxFit.cover,
-    //                   ),
-    //                 ),
-    //                 SizedBox(width: 12),
-    //                 Expanded(
-    //                   child: Column(
-    //                     crossAxisAlignment: CrossAxisAlignment.start,
-    //                     children: <Widget>[
-    //                       Text(
-    //                         getAllFavouriteBook()[index].title,
-    //                         overflow: TextOverflow.ellipsis,
-    //                         softWrap: true,
-    //                         maxLines: 3,
-    //                         style: TextStyle(
-    //                           fontSize: 20,
-    //                           height: 1,
-    //                           color: Theme.of(context).colorScheme.primary,
-    //                         ),
-    //                       ),
-    //                       SizedBox(height: 8),
-    //                       Text("Автор: ${getAllFavouriteBook()[index].author}"),
-    //                     ],
-    //                   ),
-    //                 ),
-    //                 IconButton(
-    //                   onPressed: () {
-    //                     setState(() {
-    //                       !collectionOrNo(getAllFavouriteBook()[index])
-    //                           ? addFavouritreBook(getAllFavouriteBook()[index])
-    //                           : deleteFavouriteBook(
-    //                               getAllFavouriteBook()[index],
-    //                             );
-    //                     });
-    //                   },
-    //                   icon: collectionOrNo(getAllFavouriteBook()[index])
-    //                       ? Icon(Icons.bookmark)
-    //                       : Icon(Icons.bookmark_add_outlined),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //         ),
-    //         onTap: () {
-    //           Navigator.push(
-    //             context,
-    //             MaterialPageRoute(
-    //               builder: (_) =>
-    //                   CurrentBook(book: getAllFavouriteBook()[index]),
-    //               //builder: (_) => CollectionBooks(),
-    //             ),
-    //           );
-    //         },
-    //       );
-    //     },
-    //   ),
-    // );
   }
 }
 
-bool collectionOrNo(Book bookInBookList) {
-  for (Book bookInCollection in getAllFavouriteBook()) {
-    if (bookInCollection == bookInBookList) {
-      return true;
-    }
-  }
-  return false;
-}

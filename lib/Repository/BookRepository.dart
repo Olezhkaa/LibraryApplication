@@ -25,6 +25,13 @@ class BookRepository {
     return await Future.wait(dataList);
   }
 
+  Future<Book> getBookById(int bookId) async {
+    final response = await Dio().get("${Appconstants.baseUrl}/api/books/$bookId");
+    final data = response.data as Map<String, dynamic>;
+    String imagePath = await getMainImageBook(bookId);
+    return Book(id: data['id'], title: data['title'], author: data['author'], genre: data['genre'], description: data['description'], imagePath: imagePath);
+  }
+
   Future<String> getMainImageBook(int bookId) async {
     final response = await Dio().get(
       "${Appconstants.baseUrl}/api/books/$bookId/images",

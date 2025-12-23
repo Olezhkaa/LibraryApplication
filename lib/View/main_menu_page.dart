@@ -31,8 +31,6 @@ class _MainMenuState extends State<MainMenu> {
 
   @override
   Widget build(BuildContext context) {
-    //var romanticGenreBook = getRomanticGenreBook(bookList);
-    //var detectiveGenreBook = getDetectiveGenreBook(bookList);
     return Scaffold(
       body: genreList == null
           ? const SizedBox()

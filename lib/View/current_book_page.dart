@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_application/Entities/Book.dart';
+import 'package:library_application/Repository/FavoriteBookRepository.dart';
 
 class CurrentBook extends StatefulWidget {
   const CurrentBook({super.key, required this.book});
@@ -11,6 +12,7 @@ class CurrentBook extends StatefulWidget {
 }
 
 class _CurrentBookState extends State<CurrentBook> {
+  int userId = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,15 +55,26 @@ class _CurrentBookState extends State<CurrentBook> {
                   ],
                 ),
                 IconButton(
-                  onPressed: () {
-                    setState(() {
-                      //!collectionOrNo(widget.book) ? addFavouritreBook(widget.book) : deleteFavouriteBook(widget.book);
+                  onPressed: () async {
+                    final repository = Favoritebookrepository();
+                    final isInFavorites = await repository.extentionBookInList(userId, widget.book.id);
+                    
+                    setState(() async {
+                      isInFavorites ? repository.deleteFavoriteBook(userId, widget.book.id) : repository.postFavoriteBook(userId, widget.book.id);
                     });
                   },
-                  icon: collectionOrNo(widget.book)
-                      ? Icon(Icons.bookmark)
-                      : Icon(Icons.bookmark_add_outlined),
-                ),
+                  icon: FutureBuilder<bool>(
+                            future: Favoritebookrepository().extentionBookInList(userId, widget.book.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return snapshot.data!
+                                    ? Icon(Icons.bookmark)
+                                    : Icon(Icons.bookmark_add_outlined);
+                              }
+                              return Icon(Icons.bookmark_border);
+                            },
+                          ),
+                        ),
               ],
             ),
             SizedBox(height: 20),
@@ -88,11 +101,3 @@ class _CurrentBookState extends State<CurrentBook> {
   }
 }
 
-bool collectionOrNo(Book bookInBookList) {
-  // for(Book bookInCollection in getAllFavouriteBook()) {
-  //   if(bookInCollection == bookInBookList) {
-  //     return true;
-  //   }
-  // }
-  return false;
-}
