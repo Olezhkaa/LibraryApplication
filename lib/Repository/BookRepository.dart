@@ -1,23 +1,62 @@
 import 'package:library_application/Entities/Book.dart';
 import 'package:dio/dio.dart';
+import 'package:library_application/Repository/AppConstants.dart';
+// import 'package:library_application/Entities/BookImage.dart';
 
 class BookRepository {
   Future<List<Book>> getAllBooks() async {
-    final response = await Dio().get("http://10.27.105.230:5000/api/books");
+    final response = await Dio().get("${Appconstants.baseUrl}/api/books");
 
     final data = response.data as List<dynamic>;
-    final dataList = data.map((e) {
+    final dataList = data.map((e) async {
       final bookData = e as Map<String, dynamic>;
+
+      final imagePath = await getMainImageBook(bookData['id']);
+
       return Book(
         id: bookData['id'],
         title: bookData['title'],
         author: bookData['authorFullName'],
         genre: bookData['genreTitle'],
         description: bookData['description'],
-        imagePath:
-            "https://otvet.cdn-vk.net/api/pictures/images/4ba11f583ec5fa1e234de222406fc0cf044d996c7869395cffdcf5b35624368d49da6c3c811fc5f8072a30a3b562b775.jpg?size=origin",
+        imagePath: imagePath,
       );
     }).toList();
-    return dataList;
+    return await Future.wait(dataList);
+  }
+
+  Future<String> getMainImageBook(int bookId) async {
+    final response = await Dio().get(
+      "${Appconstants.baseUrl}/api/books/$bookId/images",
+    );
+
+    final data = response.data as List<dynamic>;
+
+    // Ищем изображение с isMain == true
+    for (var item in data) {
+      final bookImageData = item as Map<String, dynamic>;
+      if (bookImageData['isMain'] == true) {
+        final url = bookImageData['url'] as String;
+        // Если URL уже полный, возвращаем как есть
+        if (url.startsWith('http')) {
+          return url;
+        }
+        // Иначе добавляем localhost
+        return "${Appconstants.baseUrl}$url";
+      }
+    }
+
+    // Если нет главного изображения, возвращаем первое или заглушку
+    if (data.isNotEmpty) {
+      final firstImage = data[0] as Map<String, dynamic>;
+      final url = firstImage['url'] as String;
+      if (url.startsWith('http')) {
+        return url;
+      }
+      return "${Appconstants.baseUrl}$url";
+    }
+
+    // Если вообще нет изображений
+    return Appconstants.baseBookImagePath;
   }
 }

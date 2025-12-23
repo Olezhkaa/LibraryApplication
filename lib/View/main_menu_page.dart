@@ -3,6 +3,7 @@ import 'package:library_application/Entities/Book.dart';
 import 'package:library_application/Entities/Genre.dart';
 import 'package:library_application/Repository/BookRepository.dart';
 import 'package:library_application/Repository/GenreRepository.dart';
+import 'package:library_application/View/current_book_page.dart';
 // import 'package:library_application/View/current_book_page.dart';
 
 class MainMenu extends StatefulWidget {
@@ -33,43 +34,47 @@ class _MainMenuState extends State<MainMenu> {
     //var romanticGenreBook = getRomanticGenreBook(bookList);
     //var detectiveGenreBook = getDetectiveGenreBook(bookList);
     return Scaffold(
-      body: genreList == null ? const SizedBox() :
-       ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: genreList!.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (getGenreBookList(
-                bookList!,
-                genreList![index],
-              ).isNotEmpty)
-                Text(
-                  genreList![index].title,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-              if (getGenreBookList(
-                bookList!,
-                genreList![index],
-              ).isNotEmpty)
-                SizedBox(height: 8),
-              if (getGenreBookList(
-                bookList!,
-                genreList![index],
-              ).isNotEmpty)
-                BookGenreListView(
-                  genreBookList: getGenreBookList(
-                    bookList!,
-                    genreList![index],
-                  ),
-                  genreCurrentBook: genreList![index],
-                ),
-            ],
-          );
-          //Тупое решение, надо вернуться исправить
-        },
-      ),
+      body: genreList == null
+          ? const SizedBox()
+          : ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: genreList!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (getGenreBookList(
+                      bookList!,
+                      genreList![index],
+                    ).isNotEmpty)
+                      Text(
+                        genreList![index].title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    if (getGenreBookList(
+                      bookList!,
+                      genreList![index],
+                    ).isNotEmpty)
+                      SizedBox(height: 8),
+                    if (getGenreBookList(
+                      bookList!,
+                      genreList![index],
+                    ).isNotEmpty)
+                      BookGenreListView(
+                        genreBookList: getGenreBookList(
+                          bookList!,
+                          genreList![index],
+                        ),
+                        genreCurrentBook: genreList![index],
+                      ),
+                  ],
+                );
+                //Тупое решение, надо вернуться исправить
+              },
+            ),
     );
   }
 }
@@ -129,13 +134,13 @@ class BookGenreListView extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (_) => CurrentBook(book: genreBookList[index]),
-                //     //builder: (_) => CollectionBooks(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CurrentBook(book: genreBookList[index]),
+                    //builder: (_) => CollectionBooks(),
+                  ),
+                );
               },
             ),
           );
@@ -148,7 +153,8 @@ class BookGenreListView extends StatelessWidget {
 List<Book> getGenreBookList(List<Book> allBookList, Genre genre) {
   List<Book> bookListThisGenre = [];
   for (var bookInAllList in allBookList) {
-    if (bookInAllList.genre == genre.title) bookListThisGenre.add(bookInAllList);
+    if (bookInAllList.genre == genre.title)
+      bookListThisGenre.add(bookInAllList);
   }
   return bookListThisGenre;
 }

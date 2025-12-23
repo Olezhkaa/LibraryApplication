@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_application/Data/Model/Book.dart';
 import 'package:library_application/Data/Repository/FavouriteBookRepository.dart';
-import 'package:library_application/View/current_book_page.dart';
 import 'package:animated_reorderable_list/animated_reorderable_list.dart';
 
 class CollectionBooks extends StatefulWidget {
@@ -41,20 +40,19 @@ class _CollectionBooksState extends State<CollectionBooks> {
           ),
         ),
       );
-    }
-    else if (widget.viewCollectionPage == 1) {
-      return Scaffold (
+    } else if (widget.viewCollectionPage == 1) {
+      return Scaffold(
         body: Center(
           child: AnimatedReorderableGridView(
-          padding: EdgeInsets.only(top: 20, bottom: 10, left: 20),
-          items: getAllFavouriteBook(), 
-          itemBuilder: (BuildContext context, int index) {
-            Book book = getAllFavouriteBook()[index];
-            return SizedBox(
-              key: ValueKey(book),
-              width: 180,
-              height: 340,
-              child: GestureDetector(
+            padding: EdgeInsets.only(top: 20, bottom: 10, left: 20),
+            items: getAllFavouriteBook(),
+            itemBuilder: (BuildContext context, int index) {
+              Book book = getAllFavouriteBook()[index];
+              return SizedBox(
+                key: ValueKey(book),
+                width: 180,
+                height: 340,
+                child: GestureDetector(
                   key: ValueKey(book),
                   child: Card.outlined(
                     margin: EdgeInsets.zero,
@@ -69,45 +67,45 @@ class _CollectionBooksState extends State<CollectionBooks> {
                         children: [
                           Center(
                             child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    book.imagePath,
-                                    width: 160,
-                                    height: 260,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                book.imagePath,
+                                width: 160,
+                                height: 260,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                              SizedBox(height: 8),
-                              Text(
-                                        book.title,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: true,
-                                        maxLines: 2,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          height: 1,
-                                          color: Theme.of(context).colorScheme.primary,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Expanded(child: Text("Автор: ${book.author}")),
+                          SizedBox(height: 8),
+                          Text(
+                            book.title,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            maxLines: 2,
+                            style: TextStyle(
+                              fontSize: 16,
+                              height: 1,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Expanded(child: Text("Автор: ${book.author}")),
                         ],
                       ),
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CurrentBook(book: book),
-                        //builder: (_) => CollectionBooks(),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => CurrentBook(book: Book(1, '', '', '', '', '')),
+                    //     //builder: (_) => CollectionBooks(),
+                    //   ),
+                    // );
                   },
                   // onLongPress: () {
                   //   showDialog(
-                  //     context: context, 
+                  //     context: context,
                   //     builder: (BuildContext context) {
                   //       return SimpleDialog(
                   //         title: Text(book.title),
@@ -118,46 +116,46 @@ class _CollectionBooksState extends State<CollectionBooks> {
                   //     });
                   // },
                 ),
-            );
-          }, 
-          sliverGridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 2,
-            mainAxisExtent: 340,
-          ), 
-          onReorder: (int oldIndex, int newIndex) {
+              );
+            },
+            sliverGridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 2,
+              mainAxisExtent: 340,
+            ),
+            onReorder: (int oldIndex, int newIndex) {
               setState(() {
                 final Book item = getAllFavouriteBook().removeAt(oldIndex);
                 getAllFavouriteBook().insert(newIndex, item);
-
               });
-          }, 
+            },
             enterTransition: [FlipInX(), ScaleIn()],
             exitTransition: [SlideInLeft()],
             insertDuration: const Duration(milliseconds: 300),
             removeDuration: const Duration(milliseconds: 300),
             dragStartDelay: const Duration(milliseconds: 300),
             isSameItem: (a, b) => a.id == b.id,
-            proxyDecorator: (Widget child, int index, Animation<double> animation) {
-            return Material(
-              color: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: null,
-              elevation: 6,
-              borderRadius: BorderRadius.circular(12),
-              child: child,
-            );
-          },)
+            proxyDecorator:
+                (Widget child, int index, Animation<double> animation) {
+                  return Material(
+                    color: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: null,
+                    elevation: 6,
+                    borderRadius: BorderRadius.circular(12),
+                    child: child,
+                  );
+                },
+          ),
         ),
       );
-    }
-    else {
+    } else {
       return Scaffold(
         body: ReorderableListView(
           padding: const EdgeInsets.all(8),
           children: [
-            for (final bookInCollection in getAllFavouriteBook()) 
+            for (final bookInCollection in getAllFavouriteBook())
               GestureDetector(
                 key: Key('${bookInCollection.id}'),
                 child: Card.outlined(
@@ -204,9 +202,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                             setState(() {
                               !collectionOrNo(bookInCollection)
                                   ? addFavouritreBook(bookInCollection)
-                                  : deleteFavouriteBook(
-                                      bookInCollection,
-                                    );
+                                  : deleteFavouriteBook(bookInCollection);
                             });
                           },
                           icon: collectionOrNo(bookInCollection)
@@ -218,18 +214,18 @@ class _CollectionBooksState extends State<CollectionBooks> {
                   ),
                 ),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          CurrentBook(book: bookInCollection),
-                      //builder: (_) => CollectionBooks(),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) =>
+                  //         CurrentBook(book: bookInCollection),
+                  //     //builder: (_) => CollectionBooks(),
+                  //   ),
+                  // );
                 },
                 // onDoubleTap: () {
                 //     showDialog(
-                //       context: context, 
+                //       context: context,
                 //       builder: (BuildContext context) {
                 //         return SimpleDialog(
                 //           title: Text(bookInCollection.title),
@@ -239,28 +235,28 @@ class _CollectionBooksState extends State<CollectionBooks> {
                 //         );
                 //       });
                 //   },
-              )
+              ),
           ],
-          proxyDecorator: (Widget child, int index, Animation<double> animation) {
-            return Material(
-              color: Colors.transparent,
-              elevation: 6,
-              borderRadius: BorderRadius.circular(12),
-              child: child,
-            );
-          },
+          proxyDecorator:
+              (Widget child, int index, Animation<double> animation) {
+                return Material(
+                  color: Colors.transparent,
+                  elevation: 6,
+                  borderRadius: BorderRadius.circular(12),
+                  child: child,
+                );
+              },
           onReorder: (int oldIndex, int newIndex) {
             setState(() {
-              if(oldIndex < newIndex) {
-                newIndex -=1;
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
               }
               final Book item = getAllFavouriteBook().removeAt(oldIndex);
               getAllFavouriteBook().insert(newIndex, item);
             });
-          }),
+          },
+        ),
       );
-
-      
     }
     // return Scaffold(
     //   body: ListView.builder(
