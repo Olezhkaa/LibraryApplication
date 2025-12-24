@@ -26,7 +26,9 @@ class _CollectionBooksState extends State<CollectionBooks> {
   }
 
   Future<void> _initializeData() async {
-    favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(userId);
+    favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(
+      userId,
+    );
 
     // Загружаем информацию о книгах
     if (favoriteBookList != null && favoriteBookList!.isNotEmpty) {
@@ -34,7 +36,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
       bookList = [];
       for (final favoriteBook in favoriteBookList!) {
         try {
-          final book = await bookRepository.getBookById(favoriteBook.bookId);
+          Book book = await bookRepository.getBookById(favoriteBook.bookId);
           bookList!.add(book);
         } catch (e) {
           debugPrint('Не удалось загрузить книгу ${favoriteBook.bookId}: $e');
@@ -42,7 +44,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
       }
     }
     setState(() {});
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
   }
 
   Scaffold collectionContent() {
-    if (favoriteBookList == null) {
+    if (favoriteBookList == null || favoriteBookList!.isEmpty) {
       return Scaffold(
         body: Center(
           child: Padding(
@@ -135,7 +137,6 @@ class _CollectionBooksState extends State<CollectionBooks> {
                       ),
                     );
                   },
-
                 ),
               );
             },
@@ -221,21 +222,35 @@ class _CollectionBooksState extends State<CollectionBooks> {
                         IconButton(
                           onPressed: () async {
                             final repository = Favoritebookrepository();
-                            final isInFavorites = await repository.extentionBookInList(userId, bookList![indexBook].id);
+                            final isInFavorites = await repository
+                                .extentionBookInList(
+                                  userId,
+                                  bookList![indexBook].id,
+                                );
                             setState(() async {
                               if (isInFavorites) {
-                                await repository.deleteFavoriteBook(userId, bookList![indexBook].id);
+                                await repository.deleteFavoriteBook(
+                                  userId,
+                                  bookList![indexBook].id,
+                                );
                                 // Обновляем данные
                                 await _initializeData();
                               } else {
-                                await repository.postFavoriteBook(userId, bookList![indexBook].id);
+                                await repository.postFavoriteBook(
+                                  userId,
+                                  bookList![indexBook].id,
+                                );
                                 // Обновляем данные
                                 await _initializeData();
                               }
                             });
                           },
                           icon: FutureBuilder<bool>(
-                            future: Favoritebookrepository().extentionBookInList(userId, bookList![indexBook].id),
+                            future: Favoritebookrepository()
+                                .extentionBookInList(
+                                  userId,
+                                  bookList![indexBook].id,
+                                ),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 return snapshot.data!
@@ -244,7 +259,8 @@ class _CollectionBooksState extends State<CollectionBooks> {
                               }
                               return Icon(Icons.bookmark_border);
                             },
-                          ),),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -253,8 +269,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) =>
-                          CurrentBook(book: bookList![indexBook]),
+                      builder: (_) => CurrentBook(book: bookList![indexBook]),
                       //builder: (_) => CollectionBooks(),
                     ),
                   );
@@ -284,4 +299,3 @@ class _CollectionBooksState extends State<CollectionBooks> {
     }
   }
 }
-

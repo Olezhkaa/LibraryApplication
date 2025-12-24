@@ -13,6 +13,25 @@ class CurrentBook extends StatefulWidget {
 
 class _CurrentBookState extends State<CurrentBook> {
   int userId = 1;
+  IconData? iconFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    iconFavorite =
+        await Favoritebookrepository().extentionBookInList(
+          userId,
+          widget.book.id,
+        )
+        ? Icons.bookmark
+        : Icons.bookmark_outline;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,24 +76,23 @@ class _CurrentBookState extends State<CurrentBook> {
                 IconButton(
                   onPressed: () async {
                     final repository = Favoritebookrepository();
-                    final isInFavorites = await repository.extentionBookInList(userId, widget.book.id);
-                    
-                    setState(() async {
-                      isInFavorites ? repository.deleteFavoriteBook(userId, widget.book.id) : repository.postFavoriteBook(userId, widget.book.id);
+                    final isInFavorites = await repository.extentionBookInList(
+                      userId,
+                      widget.book.id,
+                    );
+                    debugPrint("${widget.book.id}");
+                    setState(() {
+                      isInFavorites
+                          ? repository.deleteFavoriteBook(
+                              userId,
+                              widget.book.id,
+                            )
+                          : repository.postFavoriteBook(userId, widget.book.id);
+                      _initializeData();
                     });
                   },
-                  icon: FutureBuilder<bool>(
-                            future: Favoritebookrepository().extentionBookInList(userId, widget.book.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return snapshot.data!
-                                    ? Icon(Icons.bookmark)
-                                    : Icon(Icons.bookmark_add_outlined);
-                              }
-                              return Icon(Icons.bookmark_border);
-                            },
-                          ),
-                        ),
+                  icon: Icon(iconFavorite),
+                ),
               ],
             ),
             SizedBox(height: 20),
@@ -100,4 +118,3 @@ class _CurrentBookState extends State<CurrentBook> {
     );
   }
 }
-
