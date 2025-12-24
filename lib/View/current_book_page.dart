@@ -13,7 +13,9 @@ class CurrentBook extends StatefulWidget {
 
 class _CurrentBookState extends State<CurrentBook> {
   int userId = 1;
-  IconData? iconFavorite;
+  IconData iconFavorite = Icons.bookmark_outline;
+  bool isInFavorites = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -22,14 +24,55 @@ class _CurrentBookState extends State<CurrentBook> {
   }
 
   Future<void> _initializeData() async {
-    iconFavorite =
+    final isFavorite =
         await Favoritebookrepository().extentionBookInList(
           userId,
           widget.book.id,
-        )
-        ? Icons.bookmark
-        : Icons.bookmark_outline;
-    setState(() {});
+        );
+    setState(() {
+      isInFavorites = isFavorite;
+      iconFavorite = isFavorite ? Icons.bookmark : Icons.bookmark_outline;
+    });
+  }
+
+    Future<void> _toggleFavorite() async {
+    // Блокируем кнопку во время выполнения
+    setState(() {
+      isLoading = true;
+    });
+
+    final repository = Favoritebookrepository();
+    
+    try {
+      // Определяем действие на основе ТЕКУЩЕГО состояния
+      if (isInFavorites) {
+        // УДАЛЯЕМ из избранного
+        await repository.deleteFavoriteBook(userId, widget.book.id);
+        debugPrint('Удалено из избранного');
+      } else {
+        // ДОБАВЛЯЕМ в избранное
+        await repository.postFavoriteBook(userId, widget.book.id);
+        debugPrint('Добавлено в избранное');
+      }
+      
+      // Инвертируем состояние ЛОКАЛЬНО (не дожидаясь запроса)
+      setState(() {
+        isInFavorites = !isInFavorites;
+        iconFavorite = isInFavorites ? Icons.bookmark : Icons.bookmark_outline;
+      });
+      
+      // Опционально: проверяем реальное состояние на сервере
+      await _initializeData();
+      
+    } catch (e) {
+      debugPrint('Ошибка при изменении избранного: $e');
+      // В случае ошибки возвращаемся к исходному состоянию
+      await _initializeData();
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -74,24 +117,9 @@ class _CurrentBookState extends State<CurrentBook> {
                   ],
                 ),
                 IconButton(
-                  onPressed: () async {
-                    final repository = Favoritebookrepository();
-                    final isInFavorites = await repository.extentionBookInList(
-                      userId,
-                      widget.book.id,
-                    );
-                    debugPrint("${widget.book.id}");
-                    setState(() {
-                      isInFavorites
-                          ? repository.deleteFavoriteBook(
-                              userId,
-                              widget.book.id,
-                            )
-                          : repository.postFavoriteBook(userId, widget.book.id);
-                      _initializeData();
-                    });
-                  },
+                  onPressed: isLoading ? null : _toggleFavorite,
                   icon: Icon(iconFavorite),
+                  tooltip: isInFavorites ? 'Удалить из избранного' : 'Добавить в избранное',
                 ),
               ],
             ),
@@ -110,7 +138,6 @@ class _CurrentBookState extends State<CurrentBook> {
                 ),
                 textAlign: TextAlign.justify,
               ),
-              //Text(widget.book.description, style: TextStyle(fontSize: 18, height: 1.5), textAlign: TextAlign.justify,),
             ),
           ],
         ),

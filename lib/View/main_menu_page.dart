@@ -33,7 +33,7 @@ class _MainMenuState extends State<MainMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: genreList == null
-          ? const SizedBox()
+          ? EmptyFavoriteBookList()
           : ListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: genreList!.length,
@@ -74,6 +74,35 @@ class _MainMenuState extends State<MainMenu> {
               },
             ),
     );
+  }
+}
+
+class EmptyFavoriteBookList extends StatelessWidget {
+  const EmptyFavoriteBookList({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: 50.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            "Список пуст",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            "Книги скоро появятся здесь",
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    )
+            );
   }
 }
 
@@ -151,8 +180,9 @@ class BookGenreListView extends StatelessWidget {
 List<Book> getGenreBookList(List<Book> allBookList, Genre genre) {
   List<Book> bookListThisGenre = [];
   for (var bookInAllList in allBookList) {
-    if (bookInAllList.genre == genre.title)
+    if (bookInAllList.genre == genre.title) {
       bookListThisGenre.add(bookInAllList);
+    }
   }
   return bookListThisGenre;
 }

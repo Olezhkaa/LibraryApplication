@@ -18,6 +18,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
   final int userId = 1;
   List<FavoriteBook>? favoriteBookList;
   List<Book>? bookList;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -29,6 +30,10 @@ class _CollectionBooksState extends State<CollectionBooks> {
     favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(
       userId,
     );
+
+    setState(() {
+      isLoading = true;
+    });
 
     // Загружаем информацию о книгах
     if (favoriteBookList != null && favoriteBookList!.isNotEmpty) {
@@ -43,7 +48,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
         }
       }
     }
-    setState(() {});
+    setState(() { isLoading = false;});
   }
 
   @override
