@@ -20,6 +20,8 @@ class _CollectionBooksState extends State<CollectionBooks> {
   List<Book>? bookList;
   bool isLoading = false;
 
+  IconData iconFavorite = Icons.bookmark;
+
   @override
   void initState() {
     _initializeData();
@@ -30,10 +32,6 @@ class _CollectionBooksState extends State<CollectionBooks> {
     favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(
       userId,
     );
-
-    setState(() {
-      isLoading = true;
-    });
 
     // Загружаем информацию о книгах
     if (favoriteBookList != null && favoriteBookList!.isNotEmpty) {
@@ -48,7 +46,50 @@ class _CollectionBooksState extends State<CollectionBooks> {
         }
       }
     }
-    setState(() { isLoading = false;});
+    setState(() {});
+  }
+
+  Future<void> _toggleFavorite(Book book) async {
+    // Блокируем кнопку во время выполнения
+    setState(() {
+      isLoading = true;
+    });
+
+    final repository = Favoritebookrepository();
+
+    final isInFavorites = await repository.extentionBookInList(userId, book.id);
+    setState(() {
+      iconFavorite = isInFavorites ? Icons.bookmark : Icons.bookmark_outline;
+    });
+
+    try {
+      // Определяем действие на основе ТЕКУЩЕГО состояния
+      if (isInFavorites) {
+        // УДАЛЯЕМ из избранного
+        await repository.deleteFavoriteBook(userId, book.id);
+        debugPrint('Удалено из избранного');
+      } else {
+        // ДОБАВЛЯЕМ в избранное
+        await repository.postFavoriteBook(userId, book.id);
+        debugPrint('Добавлено в избранное');
+      }
+
+      // Инвертируем состояние ЛОКАЛЬНО (не дожидаясь запроса)
+      setState(() {
+        iconFavorite = isInFavorites ? Icons.bookmark : Icons.bookmark_outline;
+      });
+
+      // Опционально: проверяем реальное состояние на сервере
+      await _initializeData();
+    } catch (e) {
+      debugPrint('Ошибка при изменении избранного: $e');
+      // В случае ошибки возвращаемся к исходному состоянию
+      await _initializeData();
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -138,7 +179,6 @@ class _CollectionBooksState extends State<CollectionBooks> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => CurrentBook(book: book),
-                        // builder: (_) => CollectionBooks(),
                       ),
                     );
                   },
@@ -151,11 +191,20 @@ class _CollectionBooksState extends State<CollectionBooks> {
               crossAxisSpacing: 2,
               mainAxisExtent: 340,
             ),
-            onReorder: (int oldIndex, int newIndex) {
+            onReorder: (int oldIndex, int newIndex) async {
               setState(() {
-                final Book item = bookList!.removeAt(oldIndex);
-                bookList!.insert(newIndex, item);
+                final Book itemBook = bookList!.removeAt(oldIndex);
+                bookList!.insert(newIndex, itemBook);
+                final FavoriteBook itemFavoriteBook = favoriteBookList!
+                    .removeAt(oldIndex);
+                favoriteBookList!.insert(newIndex, itemFavoriteBook);
               });
+
+              await Favoritebookrepository().setPriorityListFavoriteBook(
+                favoriteBookList!,
+              );
+
+              _initializeData();
             },
             enterTransition: [FlipInX(), ScaleIn()],
             exitTransition: [SlideInLeft()],
@@ -226,45 +275,11 @@ class _CollectionBooksState extends State<CollectionBooks> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            final repository = Favoritebookrepository();
-                            final isInFavorites = await repository
-                                .extentionBookInList(
-                                  userId,
-                                  bookList![indexBook].id,
-                                );
-                            setState(() async {
-                              if (isInFavorites) {
-                                await repository.deleteFavoriteBook(
-                                  userId,
-                                  bookList![indexBook].id,
-                                );
-                                // Обновляем данные
-                                await _initializeData();
-                              } else {
-                                await repository.postFavoriteBook(
-                                  userId,
-                                  bookList![indexBook].id,
-                                );
-                                // Обновляем данные
-                                await _initializeData();
-                              }
-                            });
+                            isLoading
+                                ? null
+                                : _toggleFavorite(bookList![indexBook]);
                           },
-                          icon: FutureBuilder<bool>(
-                            future: Favoritebookrepository()
-                                .extentionBookInList(
-                                  userId,
-                                  bookList![indexBook].id,
-                                ),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return snapshot.data!
-                                    ? Icon(Icons.bookmark)
-                                    : Icon(Icons.bookmark_add_outlined);
-                              }
-                              return Icon(Icons.bookmark_border);
-                            },
-                          ),
+                          icon: Icon(iconFavorite),
                         ),
                       ],
                     ),
@@ -275,7 +290,6 @@ class _CollectionBooksState extends State<CollectionBooks> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => CurrentBook(book: bookList![indexBook]),
-                      //builder: (_) => CollectionBooks(),
                     ),
                   );
                 },
@@ -290,17 +304,31 @@ class _CollectionBooksState extends State<CollectionBooks> {
                   child: child,
                 );
               },
-          onReorder: (int oldIndex, int newIndex) {
-            setState(() {
-              if (oldIndex < newIndex) {
-                newIndex -= 1;
-              }
-              final Book item = bookList!.removeAt(oldIndex);
-              bookList!.insert(newIndex, item);
-            });
+          onReorder: (int oldIndex, int newIndex) async {
+            await setPriority(oldIndex, newIndex);
           },
         ),
       );
     }
+  }
+
+  Future<void> setPriority(int oldIndex, int newIndex) async {
+    setState(() {
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+      final Book itemBook = bookList!.removeAt(oldIndex);
+      bookList!.insert(newIndex, itemBook);
+      final FavoriteBook itemFavoriteBook = favoriteBookList!.removeAt(
+        oldIndex,
+      );
+      favoriteBookList!.insert(newIndex, itemFavoriteBook);
+    });
+
+    await Favoritebookrepository().setPriorityListFavoriteBook(
+      favoriteBookList!,
+    );
+
+    _initializeData();
   }
 }

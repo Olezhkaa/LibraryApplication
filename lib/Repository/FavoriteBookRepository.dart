@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:library_application/Entities/FavoriteBook.dart';
 import 'package:library_application/Repository/AppConstants.dart';
 
@@ -14,6 +15,7 @@ class Favoritebookrepository {
         id: favoriteBookData['id'],
         userId: favoriteBookData['userId'],
         bookId: favoriteBookData['bookId'],
+        priorityInList: favoriteBookData['priorityInList'],
       );
     }).toList();
     return dataList;
@@ -42,5 +44,31 @@ class Favoritebookrepository {
       "${Appconstants.baseUrl}/api/users/$userId/favorites/$bookId",
     );
     return response.statusCode.toString();
+  }
+
+  Future<String> setPriorityFavoriteBook(
+    int userId,
+    int bookId,
+    int priorityInList,
+  ) async {
+    final response = await Dio().put(
+      "${Appconstants.baseUrl}/api/users/$userId/favorites/$bookId/priority",
+      data: {'priorityInList': priorityInList},
+    );
+    return response.statusCode.toString();
+  }
+
+  Future<void> setPriorityListFavoriteBook(
+    List<FavoriteBook> bookListNew,
+  ) async {
+    debugPrint("Очередь книг:");
+    for (int i = 0; i <= bookListNew.length - 1; i++) {
+      await setPriorityFavoriteBook(
+        bookListNew[i].userId,
+        bookListNew[i].bookId,
+        i + 1,
+      );
+      debugPrint("book ${bookListNew[i].bookId}");
+    }
   }
 }
