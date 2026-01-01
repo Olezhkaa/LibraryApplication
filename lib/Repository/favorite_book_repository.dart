@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
-import 'package:library_application/Entities/FavoriteBook.dart';
-import 'package:library_application/Repository/AppConstants.dart';
+import 'package:library_application/Model/favorite_book.dart';
+import 'package:library_application/Service/app_constants.dart';
 
-class Favoritebookrepository {
-  Future<List<FavoriteBook>> getAllFavoriteBookByUser(int userId) async {
+class FavoriteBookRepository {
+  //Получить все избранные книги у пользователя
+  Future<List<FavoriteBook>> getAllFavoriteBookByUserId(int userId) async {
     final response = await Dio().get(
       "${Appconstants.baseUrl}/api/users/$userId/favorites",
     );
@@ -20,9 +20,9 @@ class Favoritebookrepository {
     }).toList();
     return dataList;
   }
-
+  //Добавить книгу в избранное
   Future<String> postFavoriteBook(int userId, int bookId) async {
-    List<FavoriteBook> favoriteBookList = await getAllFavoriteBookByUser(
+    List<FavoriteBook> favoriteBookList = await getAllFavoriteBookByUserId(
       userId,
     );
     final response = await Dio().post(
@@ -31,21 +31,21 @@ class Favoritebookrepository {
     );
     return response.statusCode.toString();
   }
-
-  Future<bool> extentionBookInList(int userId, int bookId) async {
+  //Существует ли данная книга
+  Future<bool> existFavoriteBook(int userId, int bookId) async {
     final response = await Dio().get(
       "${Appconstants.baseUrl}/api/users/$userId/favorites/$bookId/check",
     );
     return response.data;
   }
-
+  //Удаление книги из избранного
   Future<String> deleteFavoriteBook(int userId, int bookId) async {
     final response = await Dio().delete(
       "${Appconstants.baseUrl}/api/users/$userId/favorites/$bookId",
     );
     return response.statusCode.toString();
   }
-
+  //Смена приоритета книги
   Future<String> setPriorityFavoriteBook(
     int userId,
     int bookId,
@@ -56,19 +56,5 @@ class Favoritebookrepository {
       data: {'priorityInList': priorityInList},
     );
     return response.statusCode.toString();
-  }
-
-  Future<void> setPriorityListFavoriteBook(
-    List<FavoriteBook> bookListNew,
-  ) async {
-    debugPrint("Очередь книг:");
-    for (int i = 0; i <= bookListNew.length - 1; i++) {
-      await setPriorityFavoriteBook(
-        bookListNew[i].userId,
-        bookListNew[i].bookId,
-        i + 1,
-      );
-      debugPrint("book ${bookListNew[i].bookId}");
-    }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/Entities/Book.dart';
-import 'package:library_application/Repository/FavoriteBookRepository.dart';
+import 'package:library_application/Model/book.dart';
+import 'package:library_application/Service/favorite_book_service.dart';
 
 class CurrentBook extends StatefulWidget {
   const CurrentBook({super.key, required this.book});
@@ -25,7 +25,7 @@ class _CurrentBookState extends State<CurrentBook> {
 
   Future<void> _initializeData() async {
     final isFavorite =
-        await Favoritebookrepository().extentionBookInList(
+        await FavoritebookService().existBookInList(
           userId,
           widget.book.id,
         );
@@ -41,7 +41,7 @@ class _CurrentBookState extends State<CurrentBook> {
       isLoading = true;
     });
 
-    final repository = Favoritebookrepository();
+    final repository = FavoritebookService();
     
     try {
       // Определяем действие на основе ТЕКУЩЕГО состояния

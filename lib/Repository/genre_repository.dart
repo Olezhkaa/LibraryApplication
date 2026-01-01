@@ -1,9 +1,10 @@
-import 'package:library_application/Entities/Genre.dart';
 import 'package:dio/dio.dart';
-import 'package:library_application/Repository/AppConstants.dart';
+import 'package:library_application/Model/genre.dart';
+import 'package:library_application/Service/app_constants.dart';
 
 class GenreRepository {
-  Future<List<Genre>> getAllGenres() async {
+  //Получить полный список жанров
+  Future<List<Genre>> getAll() async {
     final response = await Dio().get("${Appconstants.baseUrl}/api/genres");
 
     final data = response.data as List<dynamic>;

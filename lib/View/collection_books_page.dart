@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animated_reorderable_list/animated_reorderable_list.dart';
-import 'package:library_application/Entities/Book.dart';
-import 'package:library_application/Entities/FavoriteBook.dart';
-import 'package:library_application/Repository/BookRepository.dart';
-import 'package:library_application/Repository/FavoriteBookRepository.dart';
+import 'package:library_application/Model/book.dart';
+import 'package:library_application/Model/favorite_book.dart';
+import 'package:library_application/Service/book_service.dart';
+import 'package:library_application/Service/favorite_book_service.dart';
 import 'package:library_application/View/current_book_page.dart';
 
 class CollectionBooks extends StatefulWidget {
@@ -29,13 +29,13 @@ class _CollectionBooksState extends State<CollectionBooks> {
   }
 
   Future<void> _initializeData() async {
-    favoriteBookList = await Favoritebookrepository().getAllFavoriteBookByUser(
+    favoriteBookList = await FavoritebookService().getAllFavoriteBookByUser(
       userId,
     );
 
     // Загружаем информацию о книгах
     if (favoriteBookList != null && favoriteBookList!.isNotEmpty) {
-      final bookRepository = BookRepository();
+      final bookRepository = BookService();
       bookList = [];
       for (final favoriteBook in favoriteBookList!) {
         try {
@@ -55,9 +55,9 @@ class _CollectionBooksState extends State<CollectionBooks> {
       isLoading = true;
     });
 
-    final repository = Favoritebookrepository();
+    final repository = FavoritebookService();
 
-    final isInFavorites = await repository.extentionBookInList(userId, book.id);
+    final isInFavorites = await repository.existBookInList(userId, book.id);
     setState(() {
       iconFavorite = isInFavorites ? Icons.bookmark : Icons.bookmark_outline;
     });
@@ -200,7 +200,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                 favoriteBookList!.insert(newIndex, itemFavoriteBook);
               });
 
-              await Favoritebookrepository().setPriorityListFavoriteBook(
+              await FavoritebookService().setPriorityListFavoriteBook(
                 favoriteBookList!,
               );
 
@@ -325,7 +325,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
       favoriteBookList!.insert(newIndex, itemFavoriteBook);
     });
 
-    await Favoritebookrepository().setPriorityListFavoriteBook(
+    await FavoritebookService().setPriorityListFavoriteBook(
       favoriteBookList!,
     );
 

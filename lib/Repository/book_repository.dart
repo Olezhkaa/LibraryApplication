@@ -1,31 +1,30 @@
-import 'package:library_application/Entities/Book.dart';
 import 'package:dio/dio.dart';
-import 'package:library_application/Repository/AppConstants.dart';
-// import 'package:library_application/Entities/BookImage.dart';
+import 'package:library_application/Model/book.dart';
+import 'package:library_application/Service/app_constants.dart';
 
 class BookRepository {
-  Future<List<Book>> getAllBooks() async {
+  Future<List<Book>> getAll() async {
     final response = await Dio().get("${Appconstants.baseUrl}/api/books");
 
-    final data = response.data as List<dynamic>;
-    final dataList = data.map((e) async {
-      final bookData = e as Map<String, dynamic>;
+        final data = response.data as List<dynamic>;
+        final dataList = data.map((e) async {
+          final bookData = e as Map<String, dynamic>;
 
-      final imagePath = await getMainImageBook(bookData['id']);
+          final imagePath = await getMainImageBook(bookData['id']);
 
-      return Book(
-        id: bookData['id'],
-        title: bookData['title'],
-        author: bookData['authorFullName'],
-        genre: bookData['genreTitle'],
-        description: bookData['description'],
-        imagePath: imagePath,
-      );
-    }).toList();
-    return await Future.wait(dataList);
+          return Book(
+            id: bookData['id'],
+            title: bookData['title'],
+            author: bookData['authorFullName'],
+            genre: bookData['genreTitle'],
+            description: bookData['description'],
+            imagePath: imagePath,
+          );
+        }).toList();
+        return await Future.wait(dataList);
   }
 
-  Future<Book> getBookById(int bookId) async {
+  Future<Book> getById(int bookId) async {
     final response = await Dio().get(
       "${Appconstants.baseUrl}/api/books/$bookId",
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/Entities/Book.dart';
-import 'package:library_application/Entities/Genre.dart';
-import 'package:library_application/Repository/BookRepository.dart';
-import 'package:library_application/Repository/GenreRepository.dart';
+import 'package:library_application/Model/book.dart';
+import 'package:library_application/Model/genre.dart';
+import 'package:library_application/Service/book_service.dart';
+import 'package:library_application/Service/genre_service.dart';
 import 'package:library_application/View/current_book_page.dart';
 // import 'package:library_application/View/current_book_page.dart';
 
@@ -24,8 +24,8 @@ class _MainMenuState extends State<MainMenu> {
   }
 
   Future<void> _initializeData() async {
-    bookList = await BookRepository().getAllBooks();
-    genreList = await GenreRepository().getAllGenres();
+    bookList = await BookService().getAllBooks();
+    genreList = await GenreService().getAllGenres();
     setState(() {});
   }
 
