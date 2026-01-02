@@ -56,7 +56,7 @@ class BookRepository {
         if (url.startsWith('http')) {
           return url;
         }
-        // Иначе добавляем localhost
+        // Иначе добавляем baseUrl
         return "${Appconstants.baseUrl}$url";
       }
     }
