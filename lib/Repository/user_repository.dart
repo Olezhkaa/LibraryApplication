@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 import 'package:library_application/Model/user.dart';
@@ -54,16 +56,16 @@ class UserRepository {
         'middleName': middleName,
       },
     );
-    return [response.statusCode.toString(), response.data];
+    return [response.statusCode.toString(), response.data.toString()];
   }
 
   //Проверка авторизации пользователя
   Future<bool> loginUser(String email, String password) async {
-    final response = await Dio().get(
+    final response = await Dio().post(
       "${Appconstants.baseUrl}/api/users/login",
       data: {'email': email, 'password': password},
     );
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       debugPrint("Авторизия пользователя $email прошла успешно");
       return true;
     } else {
@@ -89,5 +91,21 @@ class UserRepository {
       return "${Appconstants.baseUrl}$url";
     }
     return Appconstants.baseUserAnImagePath;
+  }
+
+  //Загрузка изображения
+  Future<List<String>> uploadImageUser(int userId, File image) async {
+    FormData formData = FormData.fromMap({
+        'image': await MultipartFile.fromFile(
+          image.path,
+          filename: 'User_$userId''_imageProfile.png',
+        ),
+      });
+      final response = await Dio().post(
+        "${Appconstants.baseUrl}/api/users/$userId/image",
+        data: formData,
+      );
+      debugPrint("${response.statusCode.toString()}, ${response.data.toString()}");
+      return [response.statusCode.toString(), response.data.toString()];
   }
 }

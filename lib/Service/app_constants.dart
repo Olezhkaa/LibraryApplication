@@ -4,7 +4,7 @@ class Appconstants {
   //Иконка приложения
   static const String iconApp = "";
   //Хост
-  static const String baseUrl = "http://192.168.0.104:5000";
+  static const String baseUrl = "http://192.168.0.103:5000";
   //Изображение книг базовое
   static const String baseBookImagePath =
       "https://i.ytimg.com/vi/VZzTxZ2kdE4/maxresdefault.jpg";

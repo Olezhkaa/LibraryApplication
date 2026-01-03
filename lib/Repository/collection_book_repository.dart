@@ -29,18 +29,18 @@ class CollectionBookRepository {
   //Добавить книгу в коллекию
   Future<List<String>> postBookInCollection(int userId, int collectionId, int bookId ) async {
     final response = await Dio().get("${Appconstants.baseUrl}/api/users/$userId/collections/$collectionId/books", data: {'bookId': bookId});
-    return [response.statusCode.toString(), response.data];
+    return [response.statusCode.toString(), response.data.toString()];
   } 
 
   //Удалить книгу из коллекции
   Future<List<String>> deleteBookFromCollection(int userId, int collectionId, int bookId) async {
     final response = await Dio().delete("${Appconstants.baseUrl}/api/users/$userId/collections/$collectionId/books/$bookId");
-    return [response.statusCode.toString(), response.data];
+    return [response.statusCode.toString(), response.data.toString()];
   }
 
   //Переместить книгу из коллекции в коллекцию
   Future<List<String>> moveBookFromCollections(int userId, int collectionId, int bookId, int targetCollectionId) async {
     final response = await Dio().put("${Appconstants.baseUrl}/api/users/$userId/collections/$collectionId/books/$bookId/move", data: {'targetCollectionId': targetCollectionId});
-    return [response.statusCode.toString(), response.data];
+    return [response.statusCode.toString(), response.data.toString()];
   }
 }
