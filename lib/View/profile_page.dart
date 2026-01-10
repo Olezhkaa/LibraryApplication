@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:library_application/Model/user.dart';
+import 'package:library_application/Service/app_constants.dart';
+import 'package:library_application/Service/user_service.dart';
 //import 'package:library_application/View/main.dart';
 
 class ProfilePage extends StatefulWidget {
   final void Function(bool) onThemeChanged;
   final bool isLight;
-  const ProfilePage({super.key,required this.onThemeChanged, required this.isLight});
+  final int userId;
+  const ProfilePage({super.key,required this.onThemeChanged, required this.isLight, required this.userId});
 
 
   @override
@@ -12,9 +16,31 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
+  late int userId = 0;
+  late User user = User(id: 0, email: "", firstName: "", lastName: "", middleName: "");
+  late String userImage = Appconstants.baseUserAnImagePath;
   late bool valueThemeMode;
+  bool isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    userId = widget.userId;
+    initData();
+  }
+
+  void initData() async {
+
+    setState(() {
+      isLoading = true;
+    });
+    debugPrint('userId: $userId');
+    user = await UserService().getUserById(userId);
+    userImage = await UserService().getImageUser(userId);
+    setState(() {
+      isLoading = false;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,10 +63,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 48, // Image radius
-                    backgroundImage: NetworkImage('https://i.pinimg.com/originals/82/1b/bb/821bbbb461beaeda0f8d3cc224ba631c.jpg'),
+                    backgroundImage: NetworkImage(userImage),
                   ),
                   SizedBox(height: 10,),
-                  Text("Фадеев Олег", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),)
+                  Text("${user.firstName} ${user.lastName}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),)
                 ],
               ),
             )

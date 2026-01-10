@@ -76,36 +76,35 @@ class UserRepository {
 
   //Получение изображения пользователя
   Future<String> getImageUser(int userId) async {
-    final response = await Dio().get(
-      "${Appconstants.baseUrl}/api/users/$userId/image",
-    );
-
-    final userImageData = response.data as Map<String, dynamic>;
-    if (response.statusCode != 404) {
-      final url = userImageData['url'].toString();
-      // Если URL уже полный, возвращаем как есть
-      if (url.startsWith('http')) {
-        return url;
-      }
-      // Иначе добавляем baseUrl
-      return "${Appconstants.baseUrl}$url";
+    try {
+      final response = await Dio().get(
+        "${Appconstants.baseUrl}/api/users/$userId/image",
+      );
+      debugPrint("${response.statusCode}");
+      final url = "${Appconstants.baseUrl}/api/users/$userId/image";
+      return url;
+    } catch (e) {
+      return Appconstants.baseUserAnImagePath;
     }
-    return Appconstants.baseUserAnImagePath;
   }
 
   //Загрузка изображения
   Future<List<String>> uploadImageUser(int userId, File image) async {
     FormData formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(
-          image.path,
-          filename: 'User_$userId''_imageProfile.png',
-        ),
-      });
-      final response = await Dio().post(
-        "${Appconstants.baseUrl}/api/users/$userId/image",
-        data: formData,
-      );
-      debugPrint("${response.statusCode.toString()}, ${response.data.toString()}");
-      return [response.statusCode.toString(), response.data.toString()];
+      'image': await MultipartFile.fromFile(
+        image.path,
+        filename:
+            'User_$userId'
+            '_imageProfile.png',
+      ),
+    });
+    final response = await Dio().post(
+      "${Appconstants.baseUrl}/api/users/$userId/image",
+      data: formData,
+    );
+    debugPrint(
+      "${response.statusCode.toString()}, ${response.data.toString()}",
+    );
+    return [response.statusCode.toString(), response.data.toString()];
   }
 }

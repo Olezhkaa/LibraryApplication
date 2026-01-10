@@ -11,6 +11,16 @@ class UserService {
     return await UserRepository().getUserById(userId);
   }
 
+  Future<int> getUserIdByEmail(String email) async {
+    var userList = await UserRepository().getAllUsers();
+    for(User user in userList) {
+      if(user.email == email) {
+        return user.id;
+      }
+    }
+    return 0;
+  }
+
   //Регистраиця пользователя
   Future<String> registerNewUser(
     String email,

@@ -8,14 +8,15 @@ import 'package:library_application/View/current_book_page.dart';
 
 class CollectionBooks extends StatefulWidget {
   final int viewCollectionPage;
-  const CollectionBooks({required this.viewCollectionPage, super.key});
+  final int userId;
+  const CollectionBooks({required this.viewCollectionPage, required this.userId, super.key});
 
   @override
   State<CollectionBooks> createState() => _CollectionBooksState();
 }
 
 class _CollectionBooksState extends State<CollectionBooks> {
-  final int userId = 1;
+  late int userId = 0;
   List<FavoriteBook>? favoriteBookList;
   List<Book>? bookList;
   bool isLoading = false;
@@ -24,6 +25,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
 
   @override
   void initState() {
+    userId = widget.userId;
     _initializeData();
     super.initState();
   }

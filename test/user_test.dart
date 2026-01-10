@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/rendering.dart';
-import 'package:library_application/Model/user.dart';
 import 'package:library_application/Repository/user_repository.dart';
 import 'package:library_application/Service/user_service.dart';
 import 'package:test/test.dart';
@@ -18,7 +17,7 @@ void main() {
 
   test('Проверка авторизации пользователя', () async {
     try {
-        final response = await UserService().loginUser("test@test.com", "12345678");
+        final response = await UserService().loginUser("test@test.test", "12345678");
         debugPrint(response);
       } catch (e) {
         debugPrint("Ошибка: $e");
