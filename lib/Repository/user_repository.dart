@@ -60,18 +60,12 @@ class UserRepository {
   }
 
   //Проверка авторизации пользователя
-  Future<bool> loginUser(String email, String password) async {
+  Future<int> loginUser(String email, String password) async {
     final response = await Dio().post(
       "${Appconstants.baseUrl}/api/users/login",
       data: {'email': email, 'password': password},
     );
-    if (response.statusCode == 200) {
-      debugPrint("Авторизия пользователя $email прошла успешно");
-      return true;
-    } else {
-      debugPrint(response.data);
-      return false;
-    }
+    return response.statusCode!;
   }
 
   //Получение изображения пользователя

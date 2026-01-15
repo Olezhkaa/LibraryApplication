@@ -51,15 +51,11 @@ class UserService {
   }
 
   //Авторизация пользователя
-  Future<String> loginUser(String email, String password) async {
-    try {
-      final response = await UserRepository().loginUser(email, password);
-      if (response) return "Авторизация прошла успешно";
-      return "Неверный email или пароль";
-    } catch (e) {
-      debugPrint("Произошла ошибка авторизации: $e");
-      return "Произошла ошибка авторизации";
-    }
+  Future<String?> loginUser(String email, String password) async {
+    final response = await UserRepository().loginUser(email, password);
+    if (response == 200) return null;
+    if (response == 404) return "Неверный email или пароль";
+    return "Произошла ошибка на стороне сервера. Попробуйте повторить попытку позже.";
   }
 
   //Получение изображение пользоватлея

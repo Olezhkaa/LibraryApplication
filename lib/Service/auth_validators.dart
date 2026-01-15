@@ -1,8 +1,8 @@
 class AuthValidators {
 
   //Сообщения с ошибками
-  static const String emailErrorMassage = "Неверный адресс электронной почты. Попробуйте еще раз. ";
-  static const String passwordErrorMessage = "Неверный пароль. Попробуйте еще раз.";
+  static const String emailErrorMassage = "Неверный формат почты. Попробуйте еще раз. ";
+  static const String passwordErrorMessage = "Неверный формат пароля. Попробуйте еще раз.";
   
   //Ошибка - поле является обязательным
   static const String isEmptyErrorMessage = "Данное поле является обязательным";
@@ -12,7 +12,7 @@ class AuthValidators {
 
 
   //Проверка почты
-  String? mailValidator(String value) {
+  String? emailValidator(String value) {
     final String email = value;
 
 
@@ -23,7 +23,7 @@ class AuthValidators {
     //Недействительна, если отсутствует символ "@"
     if(!email.contains('@')) return emailErrorMassage;
     //Недействительна, если количество символа "@" больше или меньше 1
-    if(emailIndexOf!=1) return emailErrorMassage;
+    if(email.length>email.replaceAll('@', '').length+1) return emailErrorMassage;
     //Недействительна, если "@" находится в начале или в конце
     if(emailIndexOf==0 || emailIndexOf == email.length-1) return emailErrorMassage;
 

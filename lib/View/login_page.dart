@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:library_application/Service/auth_validators.dart';
 import 'package:library_application/Service/user_service.dart';
 import 'package:library_application/View/main.dart';
 import 'package:library_application/View/registration_page.dart';
@@ -11,12 +12,114 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  int errorsCount = 0;
+  String? forceErrorTextEmail;
+  String? forceErrorTextPassword;
+  String? forceErrorTextServer;
+  bool isLoading = false;
 
-  String login = "";
-  String password = "";
+  final controllerEmail = TextEditingController();
+  final controllerPassword = TextEditingController();
 
-  final _formkey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    controllerEmail.dispose();
+    controllerPassword.dispose();
+    super.dispose();
+  }
+
+  void onChanged(String value) {
+    //При изменения поля очищать forceErrorText
+    if (forceErrorTextEmail != null || forceErrorTextPassword != null) {
+      setState(() {
+        forceErrorTextEmail = null;
+        forceErrorTextPassword = null;
+      });
+    }
+  }
+
+  Future<void> onSave() async {
+    final bool isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      //Очищаем ошибку сервера, при новом запуске
+      forceErrorTextServer = null;
+    });
+
+    String email = controllerEmail.text;
+    String password = controllerPassword.text;
+
+    final String? errorTextEmail = AuthValidators().emailValidator(email);
+    final String? errorTextPassword = AuthValidators().passwordValidator(
+      password,
+    );
+
+    int countError = 0;
+    if (errorTextEmail != null) {
+      setState(() {
+        forceErrorTextEmail = errorTextEmail;
+      });
+      countError++;
+    }
+    if (errorTextPassword != null) {
+      setState(() {
+        forceErrorTextPassword = errorTextPassword;
+      });
+      countError++;
+    }
+    if (countError != 0) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final String? errorText = await UserService().loginUser(email, password);
+
+      // Проверяем mounted перед setState
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+        if (errorText != null) {
+          forceErrorTextServer = errorText;
+        }
+      });
+    } catch (e) {
+      // Обработка исключений
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+        forceErrorTextServer =
+            "Произошла ошибка при подключении к серверу. Попробуйте повторить попытку позже.";
+      });
+    }
+    if (forceErrorTextServer != null) {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text("Ошибка"),
+          content: Text(forceErrorTextServer!),
+          actions: [
+            TextButton(
+              onPressed: Navigator.of(context).pop,
+              child: Text("Закрыть"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      int userId = await UserService().getUserIdByEmail(email);
+      Navigator.push(context, MaterialPageRoute(builder: (_) => MyApp(initialIsLight: false, userId: userId)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,34 +127,26 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         //Задний фон
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(
-              "https://i.pinimg.com/736x/a6/be/bc/a6bebc9f249fcf8f2cf40b87d9f4cdf1.jpg",
-            ),
-            fit: BoxFit.cover,
-          ),
+          // image: DecorationImage(
+          //   image: NetworkImage(
+          //     "https://i.pinimg.com/736x/a6/be/bc/a6bebc9f249fcf8f2cf40b87d9f4cdf1.jpg",
+          //   ),
+          //   fit: BoxFit.cover,
+          // ),
         ),
         //Окно заполнения данных
         child: Center(
           child: SingleChildScrollView(
-            //Рамки
             child: Container(
-              padding: EdgeInsets.only(
+              alignment: Alignment.center,
+              padding: EdgeInsetsGeometry.only(
                 top: 55,
                 left: 35,
                 right: 35,
                 bottom: 40,
               ),
-              //margin: EdgeInsets.only(top: 200),
-              width: 350,
-              height: 450,
-              // decoration: BoxDecoration(
-              //   //color: Colors.white,
-              //   //border: Border.all(width: 2, color: Colors.black),
-              //   //borderRadius: BorderRadius.all(Radius.circular(25)),
-              // ),
               child: Form(
-                key: _formkey,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
@@ -68,49 +163,16 @@ class _LoginPageState extends State<LoginPage> {
                     //Поле ввода Email
                     SizedBox(
                       width: 300,
-                      height: 55,
+                      height: forceErrorTextEmail == null ? 80 : 50,
                       child: TextFormField(
-                        //maxLength: 36,
                         maxLines: 1,
-
-                        validator: (value) {
-                          int errorsCountEmail = 0;
-
-                          if (value == null) {
-                            errorsCountEmail++;
-                            return "Введите адресс электронной почты";
-                          }
-                          if (value.length !=
-                              value.replaceAll(' ', '').length) {
-                            errorsCountEmail++;
-                            return "Адресс электронной почты не должен содержать пробелы";
-                          }
-                          if (!value.contains("@")) {
-                            errorsCountEmail++;
-                            return "Введите корректный адресс электронной почты";
-                          }
-                          if (value[value.indexOf("@") + 1] == '') {
-                            errorsCountEmail++;
-                            return "Введите корректный адресс электронной почты";
-                          }
-                          if (value.length <= 2) {
-                            errorsCountEmail++;
-                            return "Адресс электронной почты должен быть больше 2 символов";
-                          }
-
-                          setState(() {
-                            errorsCount += errorsCountEmail;
-                          });
-
-                          return null;
-                        },
-                        onChanged: (value) {
-                          setState(() {
-                            login = value;
-                          });
-                        },
+                        forceErrorText: forceErrorTextEmail,
+                        validator: (value) =>
+                            AuthValidators().emailValidator(value!),
+                        onChanged: (value) => onChanged(value),
+                        controller: controllerEmail,
                         decoration: InputDecoration(
-                          filled: true,
+                          filled: false,
                           fillColor: Colors.black54,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -118,8 +180,8 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: "Электронная почта",
                           //hintText: "Электронная почта",
                           suffixIcon: Icon(Icons.email, size: 20),
-
-                          errorStyle: TextStyle(fontSize: 18.0),
+                          errorMaxLines: 1,
+                          errorStyle: TextStyle(fontSize: 14.0),
                         ),
                       ),
                     ),
@@ -128,42 +190,18 @@ class _LoginPageState extends State<LoginPage> {
                     //Поле ввода пароля
                     SizedBox(
                       width: 300,
-                      height: 55,
+                      height: forceErrorTextEmail == null ? 80 : 50,
                       child: TextFormField(
                         maxLines: 1,
                         //СКрыть содержимое
                         obscureText: true,
-                        validator: (value) {
-                          int errorsCountPassword = 0;
-
-                          if (value == null) {
-                            errorsCountPassword++;
-                            return "Введите пароль";
-                          }
-                          if (value.length !=
-                              value.replaceAll(' ', '').length) {
-                            errorsCountPassword++;
-                            return "Пароль не должен содержать пробелы";
-                          }
-                          if (value.length <= 2 && value.length > 16) {
-                            errorsCountPassword++;
-                            return "Пароль должен быть от 2 до 16 символов";
-                          }
-
-                          setState(() {
-                            errorsCount += errorsCountPassword;
-
-                          });
-
-                          return null;
-                        },
-                        onChanged: (value) {
-                          setState(() {
-                            password = value;
-                          });
-                        },
+                        validator: (value) =>
+                            AuthValidators().passwordValidator(value!),
+                        controller: controllerPassword,
+                        forceErrorText: forceErrorTextPassword,
+                        onChanged: (value) => onChanged(value),
                         decoration: InputDecoration(
-                          filled: true,
+                          filled: false,
                           fillColor: Colors.black54,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -172,14 +210,13 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: 'Пароль',
                           //hintText: 'Пароль',
                           suffixIcon: Icon(Icons.lock, size: 20),
-
-                          errorStyle: TextStyle(fontSize: 18.0),
+                          errorMaxLines: 1,
+                          errorStyle: TextStyle(fontSize: 14.0),
                         ),
                       ),
                     ),
-                    //Отступ
-                    SizedBox(height: 5),
                     TextButton(
+                      
                       onPressed: () {
                         debugPrint("Перейти на регистрацию");
                       },
@@ -200,65 +237,49 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(
                           "Нет аккаунта? Нажмите, чтобы создать новый",
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(fontSize: 12, color: Colors.white70),
                         ),
                       ),
                     ),
                     //Отступ
                     SizedBox(height: 5),
-                    //Кнопка войти
-                    ElevatedButton(
-                      onPressed: () async {
-                        debugPrint("$login, $password");
-                        if (errorsCount == 0) {
-                          var isAuthorization = await UserService().loginUser(
-                            login,
-                            password,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(isAuthorization, style: TextStyle(fontSize: 16),), 
-                            padding: EdgeInsets.all(20),));
-                          if (isAuthorization == "Авторизация прошла успешно") {
-                            int userId = await UserService().getUserIdByEmail(login);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    MyApp(initialIsLight: false, userId: userId),
+
+                    if (isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      //Кнопка войти
+                      SizedBox(
+                        width: 300,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            onSave();
+                          },
+                          style: ButtonStyle(
+                            padding: WidgetStateProperty.all(
+                              EdgeInsets.only(
+                                left: 65,
+                                right: 65,
+                                top: 5,
+                                bottom: 5,
                               ),
-                            );
-                          }
-                        }
-                        //     Navigator.push(
-                        //           context,
-                        //           MaterialPageRoute(
-                        //           builder: (_) => MyApp(initialIsLight: false, userId: 1),
-                        // ), );
-                      },
-                      style: ButtonStyle(
-                        padding: WidgetStateProperty.all(
-                          EdgeInsets.only(
-                            left: 65,
-                            right: 65,
-                            top: 5,
-                            bottom: 5,
+                            ),
+                            backgroundColor: WidgetStateProperty.all(
+                              Colors.deepOrange,
+                            ),
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.deepOrange),
+                              ),
+                            ),
                           ),
-                        ),
-                        backgroundColor: WidgetStateProperty.all(
-                          Colors.deepOrange,
-                        ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.0),
-                            side: BorderSide(color: Colors.deepOrange),
+                          
+                          child: Text(
+                            "Войти",
+                            style: TextStyle(fontSize: 18, color: Colors.white),
                           ),
                         ),
                       ),
-                      child: Text(
-                        "Войти",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
                   ],
                 ),
               ),
