@@ -61,11 +61,15 @@ class UserRepository {
 
   //Проверка авторизации пользователя
   Future<int> loginUser(String email, String password) async {
-    final response = await Dio().post(
-      "${Appconstants.baseUrl}/api/users/login",
-      data: {'email': email, 'password': password},
-    );
-    return response.statusCode!;
+    try {
+      final response = await Dio().post(
+        "${Appconstants.baseUrl}/api/users/login",
+        data: {'email': email, 'password': password},
+      );
+      return response.statusCode!;
+    } catch (e) {
+      return 404;
+    }
   }
 
   //Получение изображения пользователя

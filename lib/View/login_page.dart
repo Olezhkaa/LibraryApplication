@@ -93,6 +93,8 @@ class _LoginPageState extends State<LoginPage> {
       });
     } catch (e) {
       // Обработка исключений
+      debugPrint("Ошибка: $e");
+      debugPrint("$email и $password");
       if (!mounted) return;
 
       setState(() {
@@ -117,7 +119,12 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       int userId = await UserService().getUserIdByEmail(email);
-      Navigator.push(context, MaterialPageRoute(builder: (_) => MyApp(initialIsLight: false, userId: userId)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MyApp(initialIsLight: false, userId: userId),
+        ),
+      );
     }
   }
 
@@ -155,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     //Отступ
@@ -216,7 +223,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     TextButton(
-                      
                       onPressed: () {
                         debugPrint("Перейти на регистрацию");
                       },
@@ -237,7 +243,10 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(
                           "Нет аккаунта? Нажмите, чтобы создать новый",
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
@@ -273,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          
+
                           child: Text(
                             "Войти",
                             style: TextStyle(fontSize: 18, color: Colors.white),

@@ -10,10 +10,6 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPage extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text("Страница авторизации"),
-      ),
-    );
+    return Scaffold(body: Center(child: Text("Страница Регистрации")));
   }
 }

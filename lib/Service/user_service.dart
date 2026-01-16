@@ -13,8 +13,8 @@ class UserService {
 
   Future<int> getUserIdByEmail(String email) async {
     var userList = await UserRepository().getAllUsers();
-    for(User user in userList) {
-      if(user.email == email) {
+    for (User user in userList) {
+      if (user.email == email) {
         return user.id;
       }
     }
@@ -54,7 +54,7 @@ class UserService {
   Future<String?> loginUser(String email, String password) async {
     final response = await UserRepository().loginUser(email, password);
     if (response == 200) return null;
-    if (response == 404) return "Неверный email или пароль";
+    if (response == 401) return "Неверный email или пароль";
     return "Произошла ошибка на стороне сервера. Попробуйте повторить попытку позже.";
   }
 

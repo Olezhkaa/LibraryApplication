@@ -12,11 +12,11 @@ void main() async {
   // читаем сохранённую тему, если нет — ставим светлую
   final isLight = prefs.getBool('isLightTheme') ?? true;
 
-  runApp(MyApp(initialIsLight: isLight, userId: 0,));
+  runApp(MyApp(initialIsLight: isLight, userId: 0));
 }
 
 class MyApp extends StatefulWidget {
-  final int userId; 
+  final int userId;
   final bool initialIsLight;
   const MyApp({super.key, required this.initialIsLight, required this.userId});
 
@@ -72,7 +72,11 @@ class _MyAppState extends State<MyApp> {
 
       themeMode: _themeMode,
 
-      home: LibraryMainPage(onThemeChanged: _toggleTheme, isLight: isLight, userId: userId,),
+      home: LibraryMainPage(
+        onThemeChanged: _toggleTheme,
+        isLight: isLight,
+        userId: userId,
+      ),
     );
   }
 }
@@ -85,7 +89,7 @@ class LibraryMainPage extends StatefulWidget {
     super.key,
     required this.onThemeChanged,
     required this.isLight,
-    required this.userId
+    required this.userId,
   });
 
   @override
@@ -122,93 +126,91 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
 
   Scaffold mainPageFromMyApp(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: colorAppBar(currentPageIndex),
-          title: Text(
-            "Личная библиотека",
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Colors.deepOrange,
-            ),
+      appBar: AppBar(
+        backgroundColor: colorAppBar(currentPageIndex),
+        title: Text(
+          "Личная библиотека",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.deepOrange,
           ),
-          actions: <Widget>[
-            if (currentPageIndex == 1) iconButtonViewCollection(),
-            IconButton(
-              onPressed: () {
-                final snackBar = SnackBar(
-                  content: const Text(
-                    "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
-                  ),
-                  action: SnackBarAction(label: "Спрятать", onPressed: () {}),
-                );
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              },
-              icon: Icon(Icons.info, color: Colors.deepOrange),
+        ),
+        actions: <Widget>[
+          if (currentPageIndex == 1) iconButtonViewCollection(),
+          IconButton(
+            onPressed: () {
+              final snackBar = SnackBar(
+                content: const Text(
+                  "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
+                ),
+                action: SnackBarAction(label: "Спрятать", onPressed: () {}),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            icon: Icon(Icons.info, color: Colors.deepOrange),
+          ),
+        ],
+      ),
+
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(color: Colors.deepOrange); // активный
+            }
+            return const TextStyle(color: Colors.grey); // неактивный
+          }),
+          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
+            Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: Colors.deepOrange); // активный
+            }
+            return const IconThemeData(color: Colors.grey); // неактивный
+          }),
+        ),
+        child: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          indicatorColor: Colors.transparent,
+          overlayColor: WidgetStateProperty.all<Color>(Colors.transparent),
+          //labelTextStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Colors.purple)), //Цвет надписей
+          //indicatorColor: Theme.of(context).colorScheme.inversePrimary,
+          selectedIndex: currentPageIndex,
+          destinations: const <Widget>[
+            NavigationDestination(
+              selectedIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              label: "Главная",
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.bookmark),
+              icon: Icon(Icons.bookmark_outline),
+              label: "Коллекция",
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.person),
+              icon: Icon(Icons.person_outline),
+              label: "Профиль",
             ),
           ],
         ),
-
-        bottomNavigationBar: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
-              Set<WidgetState> states,
-            ) {
-              if (states.contains(WidgetState.selected)) {
-                return const TextStyle(color: Colors.deepOrange); // активный
-              }
-              return const TextStyle(color: Colors.grey); // неактивный
-            }),
-            iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
-              Set<WidgetState> states,
-            ) {
-              if (states.contains(WidgetState.selected)) {
-                return const IconThemeData(
-                  color: Colors.deepOrange,
-                ); // активный
-              }
-              return const IconThemeData(color: Colors.grey); // неактивный
-            }),
-          ),
-          child: NavigationBar(
-            onDestinationSelected: (int index) {
-              setState(() {
-                currentPageIndex = index;
-              });
-            },
-            indicatorColor: Colors.transparent,
-            overlayColor: WidgetStateProperty.all<Color>(Colors.transparent),
-            //labelTextStyle: MaterialStateProperty.all<TextStyle>(TextStyle(color: Colors.purple)), //Цвет надписей
-            //indicatorColor: Theme.of(context).colorScheme.inversePrimary,
-            selectedIndex: currentPageIndex,
-            destinations: const <Widget>[
-              NavigationDestination(
-                selectedIcon: Icon(Icons.home),
-                icon: Icon(Icons.home_outlined),
-                label: "Главная",
-              ),
-              NavigationDestination(
-                selectedIcon: Icon(Icons.bookmark),
-                icon: Icon(Icons.bookmark_outline),
-                label: "Коллекция",
-              ),
-              NavigationDestination(
-                selectedIcon: Icon(Icons.person),
-                icon: Icon(Icons.person_outline),
-                label: "Профиль",
-              ),
-            ],
-          ),
+      ),
+      body: <Widget>[
+        MainMenu(),
+        CollectionBooks(viewCollectionPage: viewCollectionPage, userId: userId),
+        ProfilePage(
+          onThemeChanged: widget.onThemeChanged,
+          isLight: widget.isLight,
+          userId: userId,
         ),
-        body: <Widget>[
-          MainMenu(),
-          CollectionBooks(viewCollectionPage: viewCollectionPage, userId: userId),
-          ProfilePage(
-            onThemeChanged: widget.onThemeChanged,
-            isLight: widget.isLight,
-            userId: userId
-          ),
-        ][currentPageIndex],
-      );
+      ][currentPageIndex],
+    );
   }
 
   IconButton iconButtonViewCollection() {
