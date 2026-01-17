@@ -11,8 +11,9 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   // читаем сохранённую тему, если нет — ставим светлую
   final isLight = prefs.getBool('isLightTheme') ?? true;
+  final userId = prefs.getInt('userIdIsLogin') ?? 0;
 
-  runApp(MyApp(initialIsLight: isLight, userId: 0));
+  runApp(MyApp(initialIsLight: isLight, userId: userId));
 }
 
 class MyApp extends StatefulWidget {
@@ -112,6 +113,30 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
     isAuthorization = userId == 0 ? false : true;
   }
 
+  //Всплывающее окно выхода из приложения
+  Future<bool> _onWillPopScope() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Выход'),
+            content: Text('Вы уверены, что хотите выйти?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                //Отказ
+                child: Text('Нет'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                //Подтверждение выхода
+                child: Text('Да'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     //Если пользователь не авторизован открываем LoginPage()
@@ -120,7 +145,8 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
     }
     //Если авторизован - главное меню
     else {
-      return mainPageFromMyApp(context);
+      return WillPopScope(child: 
+      mainPageFromMyApp(context), onWillPop: () => _onWillPopScope());
     }
   }
 
@@ -202,7 +228,7 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
         ),
       ),
       body: <Widget>[
-        MainMenu(),
+        MainMenu(userId: userId,),
         CollectionBooks(viewCollectionPage: viewCollectionPage, userId: userId),
         ProfilePage(
           onThemeChanged: widget.onThemeChanged,

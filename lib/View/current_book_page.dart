@@ -3,16 +3,17 @@ import 'package:library_application/Model/book.dart';
 import 'package:library_application/Service/favorite_book_service.dart';
 
 class CurrentBook extends StatefulWidget {
-  const CurrentBook({super.key, required this.book});
+  const CurrentBook({super.key, required this.book, required this.userId});
 
   final Book book;
+  final int userId;
 
   @override
   State<CurrentBook> createState() => _CurrentBookState();
 }
 
 class _CurrentBookState extends State<CurrentBook> {
-  int userId = 1;
+  late int userId = 0;
   IconData iconFavorite = Icons.bookmark_outline;
   bool isInFavorites = false;
   bool isLoading = false;
@@ -20,6 +21,7 @@ class _CurrentBookState extends State<CurrentBook> {
   @override
   void initState() {
     super.initState();
+    userId = widget.userId;
     _initializeData();
   }
 
@@ -132,7 +134,7 @@ class _CurrentBookState extends State<CurrentBook> {
                     WidgetSpan(child: SizedBox(width: 40)),
                     TextSpan(
                       text: widget.book.description,
-                      style: TextStyle(fontSize: 18, height: 1.5),
+                      style: TextStyle(fontSize: 18, height: 1, color: Theme.of(context).colorScheme.primary),
                     ),
                   ],
                 ),

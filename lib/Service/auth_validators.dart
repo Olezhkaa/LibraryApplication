@@ -34,8 +34,10 @@ class AuthValidators {
   String? passwordValidator(String value) {
     final String password = value;
     
-    //Если поле пустое или пароль меньше 6
-    if (password.isEmpty || password.length < 6) return passwordErrorMessage;
+    //Если поле пустое 
+    if (password.isEmpty) return passwordErrorMessage;
+    //Пароль должен быть от 6 до 20 символов
+    if (password.length < 6 || password.length > 20) return passwordErrorMessage;
 
     //Если все проверки пройдены, возвращает null
     return null;

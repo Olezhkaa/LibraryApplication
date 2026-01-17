@@ -22,37 +22,30 @@ class UserService {
   }
 
   //Регистраиця пользователя
-  Future<String> registerNewUser(
+  Future<String?> registerNewUser(
     String email,
     String password,
     String firstName,
     String lastName,
     String middleName,
   ) async {
-    final response = await UserRepository().postUser(
-      email,
-      password,
-      firstName,
-      lastName,
-      middleName,
-    );
-    try {
-      if (response[0] == "201") {
-        debugPrint("Пользователь $email зарегестрировался");
-        return "Регистрация прошла успешно";
-      } else {
-        debugPrint(response[1]);
-        return "Произошла ошибка, попробуйте заполнить поля заново";
-      }
-    } catch (e) {
-      debugPrint("$e");
-      return "Произошла ошибка регистрации пользователя";
+    final response = await UserRepository()
+        .postUser(email, password, firstName, lastName, middleName)
+        .timeout(Duration(seconds: 10));
+    if (response == 201) {
+      debugPrint("Пользователь $email зарегестрировался");
+      return null;
+    } else if (response == 400) {
+      if (await getUserIdByEmail(email) != 0) return "Пользователь с таким адрессом электронной почты уже существует";
+      return "Произошла ошибка, попробуйте заполнить поля заново";
     }
+    return "Произошла ошибка на стороне сервера. Попробуйте повторить попытку позже.";
   }
 
   //Авторизация пользователя
   Future<String?> loginUser(String email, String password) async {
     final response = await UserRepository().loginUser(email, password);
+    debugPrint("Статус код авторизации: $response");
     if (response == 200) return null;
     if (response == 401) return "Неверный email или пароль";
     return "Произошла ошибка на стороне сервера. Попробуйте повторить попытку позже.";

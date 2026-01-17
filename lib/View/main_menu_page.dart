@@ -7,7 +7,9 @@ import 'package:library_application/View/current_book_page.dart';
 // import 'package:library_application/View/current_book_page.dart';
 
 class MainMenu extends StatefulWidget {
-  const MainMenu({super.key});
+  const MainMenu({super.key, required this.userId});
+
+  final int userId;
 
   @override
   State<MainMenu> createState() => _MainMenuState();
@@ -17,9 +19,12 @@ class _MainMenuState extends State<MainMenu> {
   List<Book>? bookList;
   List<Genre>? genreList;
 
+  late int userId = 0;
+
   @override
   void initState() {
     _initializeData();
+    userId = widget.userId;
     super.initState();
   }
 
@@ -66,7 +71,7 @@ class _MainMenuState extends State<MainMenu> {
                           bookList!,
                           genreList![index],
                         ),
-                        genreCurrentBook: genreList![index],
+                        genreCurrentBook: genreList![index], userId: userId,
                       ),
                   ],
                 );
@@ -111,8 +116,10 @@ class BookGenreListView extends StatelessWidget {
     super.key,
     required this.genreBookList,
     required this.genreCurrentBook,
+    required this.userId
   });
 
+  final int userId;
   final Genre genreCurrentBook;
   final List<Book> genreBookList;
 
@@ -164,7 +171,7 @@ class BookGenreListView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CurrentBook(book: genreBookList[index]),
+                    builder: (_) => CurrentBook(book: genreBookList[index], userId: userId),
                     //builder: (_) => CollectionBooks(),
                   ),
                 );

@@ -3,6 +3,7 @@ import 'package:library_application/Service/auth_validators.dart';
 import 'package:library_application/Service/user_service.dart';
 import 'package:library_application/View/main.dart';
 import 'package:library_application/View/registration_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -119,30 +120,30 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       int userId = await UserService().getUserIdByEmail(email);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('userIdIsLogin', userId);
+      final isLight = prefs.getBool('isLightTheme') ?? true;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => MyApp(initialIsLight: false, userId: userId),
+          builder: (_) => MyApp(initialIsLight: isLight, userId: userId),
         ),
       );
+      controllerEmail.clear();
+      controllerPassword.clear();
     }
   }
+  
+  Future<bool> _onWillPop() async {
+        return false;
+    }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        //Задний фон
-        decoration: BoxDecoration(
-          // image: DecorationImage(
-          //   image: NetworkImage(
-          //     "https://i.pinimg.com/736x/a6/be/bc/a6bebc9f249fcf8f2cf40b87d9f4cdf1.jpg",
-          //   ),
-          //   fit: BoxFit.cover,
-          // ),
-        ),
-        //Окно заполнения данных
-        child: Center(
+    return WillPopScope(
+      onWillPop: () => _onWillPop(),
+      child: Scaffold(
+        body: Center(
           child: SingleChildScrollView(
             child: Container(
               alignment: Alignment.center,
@@ -193,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     //Отступ
-                    SizedBox(height: 15),
+                    SizedBox(height: 10),
                     //Поле ввода пароля
                     SizedBox(
                       width: 300,
@@ -252,7 +253,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     //Отступ
                     SizedBox(height: 5),
-
+              
                     if (isLoading)
                       const CircularProgressIndicator()
                     else
@@ -282,7 +283,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-
+              
                           child: Text(
                             "Войти",
                             style: TextStyle(fontSize: 18, color: Colors.white),

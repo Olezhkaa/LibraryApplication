@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:library_application/Model/user.dart';
 import 'package:library_application/Service/app_constants.dart';
 import 'package:library_application/Service/user_service.dart';
+import 'package:library_application/View/login_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:library_application/View/main.dart';
 
 class ProfilePage extends StatefulWidget {
   final void Function(bool) onThemeChanged;
   final bool isLight;
   final int userId;
-  const ProfilePage({super.key,required this.onThemeChanged, required this.isLight, required this.userId});
-
+  const ProfilePage({
+    super.key,
+    required this.onThemeChanged,
+    required this.isLight,
+    required this.userId,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -17,7 +23,13 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late int userId = 0;
-  late User user = User(id: 0, email: "", firstName: "", lastName: "", middleName: "");
+  late User user = User(
+    id: 0,
+    email: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
+  );
   late String userImage = Appconstants.baseUserAnImagePath;
   late bool valueThemeMode;
   bool isLoading = false;
@@ -30,7 +42,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void initData() async {
-
     setState(() {
       isLoading = true;
     });
@@ -41,6 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
       isLoading = false;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,13 +60,16 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(20)),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(20),
+              ),
               border: Border.all(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                // width: 3.0
+              ),
               color: Theme.of(context).colorScheme.surfaceContainer,
-              // width: 3.0
             ),
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            ),    
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -65,23 +80,39 @@ class _ProfilePageState extends State<ProfilePage> {
                     radius: 48, // Image radius
                     backgroundImage: NetworkImage(userImage),
                   ),
-                  SizedBox(height: 10,),
-                  Text("${user.firstName} ${user.lastName}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),)
+                  SizedBox(height: 10),
+                  Text(
+                    "${user.firstName} ${user.lastName}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                  ),
                 ],
               ),
-            )
+            ),
           ),
           SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Row(
+            child: Column(
               children: [
-                //Text("Тема: "),
-                SizedBox(width: 8,),
-                buttonReplaceTheme(),
+                Row(
+                  children: [
+                    SizedBox(width: 8),
+                    buttonReplaceTheme(),
+                    SizedBox(width: 8),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    SizedBox(width: 8),
+                    buttonOutLogin(),
+                    SizedBox(width: 8),
+                  ],
+                ),
+                SizedBox(height: 10),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -93,25 +124,54 @@ class _ProfilePageState extends State<ProfilePage> {
     String textTheme = currentTheme ? "Светлая тема" : "Темная тема";
 
     return Expanded(
-                child: SizedBox(
-                  height: 50,
-                  child: ElevatedButton(
-                      style: ButtonStyle(animationDuration: Duration(microseconds: 100)),
-                      onPressed: () {
-                        setState(() {
-                          valueThemeMode = !currentTheme;
-                        });
-                        widget.onThemeChanged(!currentTheme);
-                      }, 
-                      child: Row(
-                        children: [
-                          Icon(iconTheme),
-                          SizedBox(width: 20,),
-                          Text(textTheme),
-                        ],
-                      ),),
-                ),
+      child: SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          style: ButtonStyle(animationDuration: Duration(microseconds: 100)),
+          onPressed: () {
+            setState(() {
+              valueThemeMode = !currentTheme;
+            });
+            widget.onThemeChanged(!currentTheme);
+          },
+          child: Row(
+            children: [Icon(iconTheme), SizedBox(width: 20), Text(textTheme)],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Expanded buttonOutLogin() {
+    return Expanded(
+      child: SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          style: ButtonStyle(animationDuration: Duration(microseconds: 100)),
+
+          onPressed: () {
+            setState(() async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setInt('userIdIsLogin', 0);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => LoginPage()),
               );
+            });
+          },
+          child: Row(
+            children: [
+              Icon(Icons.output, color: Colors.redAccent),
+              SizedBox(width: 20),
+              Text(
+                "Выйти из аккаунта",
+                style: TextStyle(color: Colors.redAccent),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
-

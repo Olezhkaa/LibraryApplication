@@ -180,7 +180,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CurrentBook(book: book),
+                        builder: (_) => CurrentBook(book: book, userId: userId,),
                       ),
                     );
                   },
@@ -291,7 +291,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CurrentBook(book: bookList![indexBook]),
+                      builder: (_) => CurrentBook(book: bookList![indexBook], userId: userId,),
                     ),
                   );
                 },

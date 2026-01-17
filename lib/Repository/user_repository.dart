@@ -39,14 +39,15 @@ class UserRepository {
   }
 
   //Добавление нового пользователя
-  Future<List<String>> postUser(
+  Future<int> postUser(
     String email,
     String password,
     String firstName,
     String lastName,
     String middleName,
   ) async {
-    final response = await Dio().post(
+    try 
+      {final response = await Dio().post(
       "${Appconstants.baseUrl}/api/users",
       data: {
         'email': email,
@@ -56,7 +57,20 @@ class UserRepository {
         'middleName': middleName,
       },
     );
-    return [response.statusCode.toString(), response.data.toString()];
+    return response.statusCode!;
+    } on DioException catch (e) {
+      // Обработка ошибок Dio
+      if (e.response != null) {
+        // Сервер ответил с ошибкой 
+        return e.response!.statusCode ?? 404;
+      } else {
+        // Ошибка сети или другая ошибка
+        return 404;
+      }
+    }
+    catch (e) {
+      return 404;
+    }
   }
 
   //Проверка авторизации пользователя
@@ -67,7 +81,17 @@ class UserRepository {
         data: {'email': email, 'password': password},
       );
       return response.statusCode!;
+    } on DioException catch (e) {
+      // Обработка ошибок Dio
+      if (e.response != null) {
+        // Сервер ответил с ошибкой (например, 401, 500)
+        return e.response!.statusCode ?? 404;
+      } else {
+        // Ошибка сети или другая ошибка
+        return 404;
+      }
     } catch (e) {
+      // Любые другие исключения
       return 404;
     }
   }
