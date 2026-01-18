@@ -3,6 +3,7 @@ import 'package:library_application/View/collection_books_page.dart';
 import 'package:library_application/View/login_page.dart';
 import 'package:library_application/View/main_menu_page.dart';
 import 'package:library_application/View/profile_page.dart';
+import 'package:library_application/View/search_book_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -165,15 +166,14 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
           if (currentPageIndex == 1) iconButtonViewCollection(),
           IconButton(
             onPressed: () {
-              final snackBar = SnackBar(
-                content: const Text(
-                  "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
-                ),
-                action: SnackBarAction(label: "Спрятать", onPressed: () {}),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SearchBookPage(userId: userId),
+        ),
+      );
             },
-            icon: Icon(Icons.info, color: Colors.deepOrange),
+            icon: Icon(Icons.search, color: Colors.deepOrange),
           ),
         ],
       ),

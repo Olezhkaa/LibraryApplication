@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/rendering.dart';
 import 'package:library_application/Model/book.dart';
 import 'package:library_application/Service/app_constants.dart';
 
@@ -6,22 +7,58 @@ class BookRepository {
   Future<List<Book>> getAll() async {
     final response = await Dio().get("${Appconstants.baseUrl}/api/books");
 
-        final data = response.data as List<dynamic>;
-        final dataList = data.map((e) async {
-          final bookData = e as Map<String, dynamic>;
+    final data = response.data as List<dynamic>;
+    final dataList = data.map((e) async {
+      final bookData = e as Map<String, dynamic>;
 
-          final imagePath = await getMainImageBook(bookData['id']);
+      final imagePath = await getMainImageBook(bookData['id']);
 
-          return Book(
-            id: bookData['id'],
-            title: bookData['title'],
-            author: bookData['authorFullName'],
-            genre: bookData['genreTitle'],
-            description: bookData['description'],
-            imagePath: imagePath,
-          );
-        }).toList();
-        return await Future.wait(dataList);
+      return Book(
+        id: bookData['id'],
+        title: bookData['title'],
+        author: bookData['authorFullName'],
+        genre: bookData['genreTitle'],
+        description: bookData['description'],
+        imagePath: imagePath,
+      );
+    }).toList();
+    return await Future.wait(dataList);
+  }
+
+  Future<List<Book>> getSearchBook(String term) async {
+    final response = await Dio().get(
+        "${Appconstants.baseUrl}/api/books/search",
+        queryParameters: {'term': term},
+      );
+
+      // Проверяем, что response.data не null и является List
+      if (response.data == null) {
+        debugPrint("Search returned null");
+        return [];
+      }
+      
+      final data = response.data as List<dynamic>;
+
+      if (data.isEmpty) {
+        debugPrint("Search returned empty list");
+        return [];
+      }
+
+      final dataList = data.map((e) async {
+        final bookData = e as Map<String, dynamic>;
+
+        final imagePath = await getMainImageBook(bookData['id']);
+
+        return Book(
+          id: bookData['id'],
+          title: bookData['title'],
+          author: bookData['authorFullName'],
+          genre: bookData['genreTitle'],
+          description: bookData['description'],
+          imagePath: imagePath,
+        );
+      }).toList();
+      return await Future.wait(dataList);
   }
 
   Future<Book> getById(int bookId) async {

@@ -105,6 +105,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   children: [
                     SizedBox(width: 8),
+                    buttonInfo(),
+                    SizedBox(width: 8),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    SizedBox(width: 8),
                     buttonOutLogin(),
                     SizedBox(width: 8),
                   ],
@@ -136,6 +144,36 @@ class _ProfilePageState extends State<ProfilePage> {
           },
           child: Row(
             children: [Icon(iconTheme), SizedBox(width: 20), Text(textTheme)],
+          ),
+        ),
+      ),
+    );
+  }
+
+    Expanded buttonInfo() {
+    return Expanded(
+      child: SizedBox(
+        height: 50,
+        child: ElevatedButton(
+          style: ButtonStyle(animationDuration: Duration(microseconds: 100)),
+
+          onPressed: () {
+            final snackBar = SnackBar(
+                content: const Text(
+                  "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
+                ),
+                action: SnackBarAction(label: "Спрятать", onPressed: () {}),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          },
+          child: Row(
+            children: [
+              Icon(Icons.info),
+              SizedBox(width: 20),
+              Text(
+                "О приложении",
+              ),
+            ],
           ),
         ),
       ),

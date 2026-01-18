@@ -8,6 +8,11 @@ class BookService {
     return await BookRepository().getAll();
   }
 
+  //Получить полный список книг по поиску
+  Future<List<Book>> getSearchBook(String term) async{
+    return await BookRepository().getSearchBook(term);
+  }
+
   //Получить книгу по ID
   Future<Book> getBookById(int bookId) async {
     return await BookRepository().getById(bookId);
