@@ -6,20 +6,20 @@ import 'package:library_application/Service/book_service.dart';
 import 'package:library_application/Service/favorite_book_service.dart';
 import 'package:library_application/View/current_book_page.dart';
 
-class CollectionBooks extends StatefulWidget {
+class FavoriteBooks extends StatefulWidget {
   final int viewCollectionPage;
   final int userId;
-  const CollectionBooks({required this.viewCollectionPage, required this.userId, super.key});
+  const FavoriteBooks({required this.viewCollectionPage, required this.userId, super.key});
 
   @override
-  State<CollectionBooks> createState() => _CollectionBooksState();
+  State<FavoriteBooks> createState() => _FavoriteBooksState();
 }
 
-class _CollectionBooksState extends State<CollectionBooks> {
+class _FavoriteBooksState extends State<FavoriteBooks> {
   late int userId = 0;
   List<FavoriteBook>? favoriteBookList;
   List<Book>? bookList;
-  bool isLoading = false;
+  bool isLoading = true;
 
   IconData iconFavorite = Icons.bookmark;
 
@@ -48,7 +48,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
         }
       }
     }
-    setState(() {});
+    setState(() {isLoading = false;});
   }
 
   Future<void> _toggleFavorite(Book book) async {
@@ -100,6 +100,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
   }
 
   Scaffold collectionContent() {
+    if ((favoriteBookList == null || favoriteBookList!.isEmpty) && isLoading) return Scaffold(body: Center(child: CircularProgressIndicator(),),);
     if (favoriteBookList == null || favoriteBookList!.isEmpty) {
       return Scaffold(
         body: Center(
@@ -126,7 +127,7 @@ class _CollectionBooksState extends State<CollectionBooks> {
       return Scaffold(
         body: Center(
           child: AnimatedReorderableGridView(
-            padding: EdgeInsets.only(top: 20, bottom: 10, left: 20),
+            padding: EdgeInsets.only(top: 10, bottom: 20, left: 15),
             items: bookList!,
             itemBuilder: (BuildContext context, int index) {
               Book book = bookList![index];

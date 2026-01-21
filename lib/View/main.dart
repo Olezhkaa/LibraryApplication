@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/View/collection_books_page.dart';
+//import 'package:library_application/View/collection_books_page.dart';
+import 'package:library_application/View/collections_page.dart';
 import 'package:library_application/View/login_page.dart';
 import 'package:library_application/View/main_menu_page.dart';
 import 'package:library_application/View/profile_page.dart';
@@ -229,7 +230,7 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
       ),
       body: <Widget>[
         MainMenu(userId: userId,),
-        CollectionBooks(viewCollectionPage: viewCollectionPage, userId: userId),
+        CollectionsPage(viewCollectionPage: viewCollectionPage, userId: userId),
         ProfilePage(
           onThemeChanged: widget.onThemeChanged,
           isLight: widget.isLight,

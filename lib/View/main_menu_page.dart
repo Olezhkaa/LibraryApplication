@@ -40,7 +40,7 @@ class _MainMenuState extends State<MainMenu> {
       body: genreList == null
           ? EmptyFavoriteBookList()
           : ListView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.symmetric(vertical: 5),
               itemCount: genreList!.length,
               itemBuilder: (BuildContext context, int index) {
                 return Column(
@@ -50,32 +50,32 @@ class _MainMenuState extends State<MainMenu> {
                       bookList!,
                       genreList![index],
                     ).isNotEmpty)
-                      Text(
-                        genreList![index].title,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    if (getGenreBookList(
-                      bookList!,
-                      genreList![index],
-                    ).isNotEmpty)
-                      SizedBox(height: 8),
-                    if (getGenreBookList(
-                      bookList!,
-                      genreList![index],
-                    ).isNotEmpty)
-                      BookGenreListView(
-                        genreBookList: getGenreBookList(
-                          bookList!,
-                          genreList![index],
-                        ),
-                        genreCurrentBook: genreList![index], userId: userId,
+                      Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.topLeft,
+                            margin: EdgeInsets.only(left: 10),
+                            child: Text(
+                              genreList![index].title,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          BookGenreListView(
+                            genreBookList: getGenreBookList(
+                              bookList!,
+                              genreList![index],
+                            ),
+                            genreCurrentBook: genreList![index],
+                            userId: userId,
+                          ),
+                        ],
                       ),
                   ],
                 );
-                //Тупое решение, надо вернуться исправить
               },
             ),
     );
@@ -83,31 +83,26 @@ class _MainMenuState extends State<MainMenu> {
 }
 
 class EmptyFavoriteBookList extends StatelessWidget {
-  const EmptyFavoriteBookList({
-    super.key,
-  });
+  const EmptyFavoriteBookList({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Center(
-    child: Padding(
-      padding: const EdgeInsets.only(bottom: 50.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "Список пуст",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "Книги скоро появятся здесь",
-            style: TextStyle(fontSize: 16),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 50.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Список пуст",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text("Книги скоро появятся здесь", style: TextStyle(fontSize: 16)),
+          ],
+        ),
       ),
-    )
-            );
+    );
   }
 }
 
@@ -116,7 +111,7 @@ class BookGenreListView extends StatelessWidget {
     super.key,
     required this.genreBookList,
     required this.genreCurrentBook,
-    required this.userId
+    required this.userId,
   });
 
   final int userId;
@@ -137,7 +132,7 @@ class BookGenreListView extends StatelessWidget {
             child: InkWell(
               child: Card(
                 elevation: 0,
-                margin: const EdgeInsets.only(right: 8.0),
+                margin:  EdgeInsets.only(right: index==genreBookList.length-1 ? 8 : 4 , left: index==0 ? 8 : 4),
                 color: Theme.of(context).cardColor,
                 child: Column(
                   children: <Widget>[
@@ -171,7 +166,8 @@ class BookGenreListView extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CurrentBook(book: genreBookList[index], userId: userId),
+                    builder: (_) =>
+                        CurrentBook(book: genreBookList[index], userId: userId),
                     //builder: (_) => CollectionBooks(),
                   ),
                 );
