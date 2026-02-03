@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_application/Model/collection.dart';
 import 'package:library_application/Service/collection_service.dart';
+import 'package:library_application/View/collection_books_tab.dart';
 import 'package:library_application/View/favorite_tab.dart';
 
 class CollectionsPage extends StatefulWidget {
@@ -95,8 +96,9 @@ class _CollectionsPageState extends State<CollectionsPage> {
       return FavoriteBooks(viewCollectionPage: widget.viewCollectionPage, userId: userId);
     }
 
-    return Center(child: Text("id: $collectionId, title: ${collection.title}"));
+    return CollectionBooksTab(viewCollectionPage: widget.viewCollectionPage, userId: userId, collectionId: collectionId);
   }
+
 
   
 }

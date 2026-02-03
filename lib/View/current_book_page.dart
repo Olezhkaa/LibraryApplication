@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:library_application/Model/book.dart';
+import 'package:library_application/Service/collection_book_service.dart';
+import 'package:library_application/Service/collection_service.dart';
 import 'package:library_application/Service/favorite_book_service.dart';
 
 class CurrentBook extends StatefulWidget {
@@ -18,6 +20,10 @@ class _CurrentBookState extends State<CurrentBook> {
   bool isInFavorites = false;
   bool isLoading = false;
 
+  List<String> listCollectionTitle = [];
+
+  String dropValue = "";
+
   @override
   void initState() {
     super.initState();
@@ -31,9 +37,21 @@ class _CurrentBookState extends State<CurrentBook> {
           userId,
           widget.book.id,
         );
+
+    var listCollection = await CollectionService().getAllCollectionNoFavorite();
+
+    var idCollectionBook = await CollectionBookService().existBookInCollectionByUser(userId, widget.book.id);
+    var collectionTitle = await CollectionService().getTitleByCollectionId(idCollectionBook);
+
     setState(() {
       isInFavorites = isFavorite;
       iconFavorite = isFavorite ? Icons.bookmark : Icons.bookmark_outline;
+
+      for(var collection in listCollection) {
+        listCollectionTitle.add(collection.title);
+      }
+
+      dropValue = collectionTitle ?? listCollectionTitle.first;
     });
   }
 
@@ -77,6 +95,17 @@ class _CurrentBookState extends State<CurrentBook> {
     }
   }
 
+  Future<void> setCollection(String value) async {
+    try {
+      int collectionId = await CollectionService().getIdByCollectionName(value);
+      
+      await CollectionBookService().postBookInCollection(userId, collectionId, widget.book.id);
+    }
+    catch (e) {
+      debugPrint("Возникла ошибка при добавлении в коллекцию: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,14 +139,19 @@ class _CurrentBookState extends State<CurrentBook> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: 50),
-                Column(
-                  children: [
-                    Text(widget.book.author, style: TextStyle(fontSize: 20)),
-                    SizedBox(height: 2),
-                    Text(widget.book.genre, style: TextStyle(fontSize: 20)),
-                  ],
-                ),
+                DropdownButton(
+                  //disabledHint: Text("Выберите..."),
+                  value: dropValue,
+                  items: listCollectionTitle.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(), 
+                onChanged: (String? newValue) async {
+                  await setCollection(newValue!);
+                  setState(() {
+                    dropValue = newValue;
+                  });
+                }),
+                SizedBox(width: 10,),
                 IconButton(
                   onPressed: isLoading ? null : _toggleFavorite,
                   icon: Icon(iconFavorite),
@@ -126,19 +160,35 @@ class _CurrentBookState extends State<CurrentBook> {
               ],
             ),
             SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Автор: ${widget.book.author}", style: TextStyle(fontSize: 16)),
+                      SizedBox(height: 2),
+                      Text("Жанр: ${widget.book.genre}", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ),
+            SizedBox(height: 20),
             Padding(
               padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    WidgetSpan(child: SizedBox(width: 40)),
-                    TextSpan(
-                      text: widget.book.description,
-                      style: TextStyle(fontSize: 18, height: 1, color: Theme.of(context).colorScheme.primary),
+              child: Column(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        WidgetSpan(child: SizedBox(width: 40)),
+                        TextSpan(
+                          text: widget.book.description,
+                          style: TextStyle(fontSize: 18, height: 1, color: Theme.of(context).colorScheme.primary),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                textAlign: TextAlign.justify,
+                    textAlign: TextAlign.justify,
+                  ),
+                ],
               ),
             ),
           ],
