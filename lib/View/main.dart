@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:library_application/View/collection_books_page.dart';
+//import 'package:library_application/View/collection_books_page.dart';
+import 'package:library_application/View/collections_page.dart';
+import 'package:library_application/View/login_page.dart';
 import 'package:library_application/View/main_menu_page.dart';
 import 'package:library_application/View/profile_page.dart';
+import 'package:library_application/View/search_book_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -10,14 +13,15 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   // читаем сохранённую тему, если нет — ставим светлую
   final isLight = prefs.getBool('isLightTheme') ?? true;
+  final userId = prefs.getInt('userIdIsLogin') ?? 0;
 
-  runApp(MyApp(initialIsLight: isLight));
+  runApp(MyApp(initialIsLight: isLight, userId: userId));
 }
 
 class MyApp extends StatefulWidget {
+  final int userId;
   final bool initialIsLight;
-  const MyApp({super.key, required this.initialIsLight});
-
+  const MyApp({super.key, required this.initialIsLight, required this.userId});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -27,10 +31,12 @@ class _MyAppState extends State<MyApp> {
   //Тема поумолчанию
   late ThemeMode _themeMode;
   late bool isLight;
+  late int userId;
 
   @override
   void initState() {
     super.initState();
+    userId = widget.userId;
     isLight = widget.initialIsLight;
     _themeMode = isLight ? ThemeMode.light : ThemeMode.dark;
   }
@@ -69,7 +75,11 @@ class _MyAppState extends State<MyApp> {
 
       themeMode: _themeMode,
 
-      home: LibraryMainPage(onThemeChanged: _toggleTheme, isLight: isLight),
+      home: LibraryMainPage(
+        onThemeChanged: _toggleTheme,
+        isLight: isLight,
+        userId: userId,
+      ),
     );
   }
 }
@@ -77,10 +87,12 @@ class _MyAppState extends State<MyApp> {
 class LibraryMainPage extends StatefulWidget {
   final void Function(bool) onThemeChanged;
   final bool isLight;
+  final int userId;
   const LibraryMainPage({
     super.key,
     required this.onThemeChanged,
     required this.isLight,
+    required this.userId,
   });
 
   @override
@@ -92,8 +104,55 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
   int viewCollectionPage = 0;
   //Color colorTheme = Theme.of(context).colorScheme.inversePrimary;
 
+  late int userId;
+  //Пользователь авторизован?
+  late bool isAuthorization;
+
+  @override
+  void initState() {
+    super.initState();
+    userId = widget.userId;
+    isAuthorization = userId == 0 ? false : true;
+  }
+
+  //Всплывающее окно выхода из приложения
+  Future<bool> _onWillPopScope() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Выход'),
+            content: Text('Вы уверены, что хотите выйти?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                //Отказ
+                child: Text('Нет'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                //Подтверждение выхода
+                child: Text('Да'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    //Если пользователь не авторизован открываем LoginPage()
+    if (isAuthorization == false) {
+      return LoginPage();
+    }
+    //Если авторизован - главное меню
+    else {
+      return WillPopScope(child: 
+      mainPageFromMyApp(context), onWillPop: () => _onWillPopScope());
+    }
+  }
+
+  Scaffold mainPageFromMyApp(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorAppBar(currentPageIndex),
@@ -108,15 +167,14 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
           if (currentPageIndex == 1) iconButtonViewCollection(),
           IconButton(
             onPressed: () {
-              final snackBar = SnackBar(
-                content: const Text(
-                  "Это ваша личная библиотека, где вы можете отмечать прочитанные книги, добавлять в избранное и делиться с друзьями.",
-                ),
-                action: SnackBarAction(label: "Спрятать", onPressed: () {}),
-              );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SearchBookPage(userId: userId),
+        ),
+      );
             },
-            icon: Icon(Icons.info, color: Colors.deepOrange),
+            icon: Icon(Icons.search, color: Colors.deepOrange),
           ),
         ],
       ),
@@ -171,11 +229,12 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
         ),
       ),
       body: <Widget>[
-        MainMenu(),
-        CollectionBooks(viewCollectionPage: viewCollectionPage),
+        MainMenu(userId: userId,),
+        CollectionsPage(viewCollectionPage: viewCollectionPage, userId: userId),
         ProfilePage(
           onThemeChanged: widget.onThemeChanged,
           isLight: widget.isLight,
+          userId: userId,
         ),
       ][currentPageIndex],
     );
@@ -183,14 +242,18 @@ class _LibraryMainPageState extends State<LibraryMainPage> {
 
   IconButton iconButtonViewCollection() {
     return IconButton(
-          onPressed: () {
-            setState(() {
-                viewCollectionPage == 0 ? viewCollectionPage = 1 : viewCollectionPage = 0;
-            });
-          },
-          icon: viewCollectionPage == 0 ? Icon(Icons.view_module, color: Colors.deepOrange,) : Icon(Icons.view_list, color: Colors.deepOrange,),
-          iconSize: 27,
-        );
+      onPressed: () {
+        setState(() {
+          viewCollectionPage == 0
+              ? viewCollectionPage = 1
+              : viewCollectionPage = 0;
+        });
+      },
+      icon: viewCollectionPage == 0
+          ? Icon(Icons.view_module, color: Colors.deepOrange)
+          : Icon(Icons.view_list, color: Colors.deepOrange),
+      iconSize: 27,
+    );
   }
 
   Color? colorAppBar(int currentPageIndex) {
