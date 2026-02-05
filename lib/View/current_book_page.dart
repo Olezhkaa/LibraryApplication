@@ -96,9 +96,10 @@ class _CurrentBookState extends State<CurrentBook> {
   }
 
   Future<void> setCollection(String value) async {
+    debugPrint("Set Collection");
     try {
       int collectionId = await CollectionService().getIdByCollectionName(value);
-      
+      debugPrint("$userId, $collectionId, ${widget.book.id}");
       await CollectionBookService().postBookInCollection(userId, collectionId, widget.book.id);
     }
     catch (e) {
@@ -146,7 +147,8 @@ class _CurrentBookState extends State<CurrentBook> {
                   return DropdownMenuItem<String>(value: value, child: Text(value));
                 }).toList(), 
                 onChanged: (String? newValue) async {
-                  await setCollection(newValue!);
+                  debugPrint("Новое значение: $newValue");
+                  setCollection(newValue!);
                   setState(() {
                     dropValue = newValue;
                   });

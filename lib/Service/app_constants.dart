@@ -7,11 +7,11 @@ class Appconstants {
   static const String baseUrl = "http://192.168.0.104:5000";
   //Изображение книг базовое
   static const String baseBookImagePath =
-      "https://i.ytimg.com/vi/VZzTxZ2kdE4/maxresdefault.jpg";
+      "https://github.com/Olezhkaa/LibraryApplication/blob/AddHttpRequests/image/base_book_image.png";
   //Изображение пользователя базовое
   static const String baseUserAnImagePath =
-      "https://avatars.mds.yandex.net/i?id=95660bbc838d1de5eeff5e4bbfe099bd_l-7086231-images-thumbs&n=13";
+      "https://github.com/Olezhkaa/LibraryApplication/blob/AddHttpRequests/image/base_user_image.png";
   //Изображение автора базововое
   static const String baseAuthorImagePath =
-      "https://i.ytimg.com/vi/VZzTxZ2kdE4/maxresdefault.jpg";
+      "https://github.com/Olezhkaa/LibraryApplication/blob/AddHttpRequests/image/base_author_image.png";
 }

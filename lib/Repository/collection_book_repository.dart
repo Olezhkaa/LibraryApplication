@@ -28,7 +28,8 @@ class CollectionBookRepository {
 
   //Добавить книгу в коллекию
   Future<List<String>> postBookInCollection(int userId, int collectionId, int bookId ) async {
-    final response = await Dio().get("${Appconstants.baseUrl}/api/users/$userId/collections/$collectionId/books", data: {'bookId': bookId});
+    final response = await Dio().post("${Appconstants.baseUrl}/api/users/$userId/collections/$collectionId/books", data: {'bookId': bookId});
+
     return [response.statusCode.toString(), response.data.toString()];
   } 
 
