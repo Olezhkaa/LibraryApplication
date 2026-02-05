@@ -81,13 +81,9 @@ class _CurrentBookState extends State<CurrentBook> {
         iconFavorite = isInFavorites ? Icons.bookmark : Icons.bookmark_outline;
       });
       
-      // Опционально: проверяем реальное состояние на сервере
-      await _initializeData();
-      
     } catch (e) {
       debugPrint('Ошибка при изменении избранного: $e');
-      // В случае ошибки возвращаемся к исходному состоянию
-      await _initializeData();
+
     } finally {
       setState(() {
         isLoading = false;
@@ -100,7 +96,17 @@ class _CurrentBookState extends State<CurrentBook> {
     try {
       int collectionId = await CollectionService().getIdByCollectionName(value);
       debugPrint("$userId, $collectionId, ${widget.book.id}");
-      await CollectionBookService().postBookInCollection(userId, collectionId, widget.book.id);
+      var checkBook = await CollectionBookService().existBookInCollectionByUser(userId, widget.book.id);
+      if(collectionId==0 && checkBook!=0) {
+        await CollectionBookService().deleteBookFromCollection(userId, checkBook, widget.book.id);
+        return;
+      }
+      if(checkBook==0) {
+        await CollectionBookService().postBookInCollection(userId, collectionId, widget.book.id);
+      }
+      else {
+        await CollectionBookService().moveBookFromCollections(userId, checkBook, widget.book.id, collectionId);
+      }
     }
     catch (e) {
       debugPrint("Возникла ошибка при добавлении в коллекцию: $e");
